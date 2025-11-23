@@ -1,0 +1,36 @@
+workflows:
+  ios-release:
+    name: Flutter iOS Release Build
+    environment:
+      flutter: stable
+      xcode: latest
+
+      vars:
+        APP_NAME: "Story App iOS"
+
+      ios_signing:
+        app_store_connect:
+          api_key: $APP_STORE_CONNECT_API_KEY
+          key_id: $APP_STORE_CONNECT_KEY_ID
+          issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+          team_id: $APPLE_TEAM_ID
+
+    scripts:
+      - name: Install dependencies
+        script: |
+          flutter pub get
+
+      - name: Build iOS IPA
+        script: |
+          flutter build ipa --release --no-codesign
+
+    artifacts:
+      - build/ios/ipa/*.ipa
+
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_API_KEY
+        key_id: $APP_STORE_CONNECT_KEY_ID
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
+        submit_to_app_store: false
