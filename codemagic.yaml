@@ -5,15 +5,15 @@ workflows:
       flutter: stable
       xcode: latest
 
-      vars:
-        APP_NAME: "Story App iOS"
-
       ios_signing:
         app_store_connect:
           api_key: $APP_STORE_CONNECT_API_KEY
           key_id: $APP_STORE_CONNECT_KEY_ID
           issuer_id: $APP_STORE_CONNECT_ISSUER_ID
           team_id: $APPLE_TEAM_ID
+
+        # ESTA LINHA É OBRIGATÓRIA!
+        bundle_identifier: com.rx4digital.storyapp
 
     scripts:
       - name: Install dependencies
