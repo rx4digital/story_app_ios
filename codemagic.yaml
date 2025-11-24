@@ -13,13 +13,18 @@ workflows:
         bundle_identifier: com.rx4digital.storyapp
 
     scripts:
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
+
       - name: Install dependencies
         script: |
           flutter pub get
 
       - name: Build iOS (IPA assinado)
         script: |
-          flutter build ipa --release
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
       - build/ios/ipa/*.ipa
