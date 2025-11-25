@@ -26,6 +26,7 @@ workflows:
           flutter build ipa --release
 
     artifacts:
+      # É aqui que o Codemagic vai buscar o .ipa para publicar
       - build/ios/ipa/*.ipa
 
     publishing:
