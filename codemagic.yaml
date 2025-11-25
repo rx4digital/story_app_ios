@@ -7,23 +7,16 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
-      groups:
-        - ios_signing
-
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.rx4digital.storyapp
 
     scripts:
-      - name: Set up code signing settings on Xcode project
-        script: |
-          xcode-project use-profiles
-
       - name: Install dependencies
         script: |
           flutter pub get
 
-      - name: Build iOS (IPA assinado)
+      - name: Build IPA
         script: |
           flutter build ipa --release
 
