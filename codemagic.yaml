@@ -7,33 +7,40 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
-      groups:
-        - ios_signing        # mesmo nome do grupo das variáveis na UI
 
-    ios_signing:
-      distribution_type: app_store
-      bundle_identifier: com.rx4digital.storyapp
+      # Diz pro Codemagic quais perfis/certificados usar
+      ios_signing:
+        distribution_type: app_store        # app_store | ad_hoc | development | enterprise
+        bundle_identifier: com.rx4digital.storyapp
+
+      # Importa as variáveis desse grupo (as que você já criou)
+      groups:
+        - ios_signing
 
     scripts:
-      - name: Set up code signing settings on Xcode project
-        script: |
-          xcode-project use-profiles
-
       - name: Install dependencies
         script: |
           flutter pub get
+
+      - name: Set up code signing settings on Xcode project
+        script: |
+          xcode-project use-profiles
 
       - name: Build iOS (IPA assinado)
         script: |
           flutter build ipa --release
 
     artifacts:
-      - build/ios/ipa/*.ipa   # caminho relativo, a partir da raiz do projeto
+      - build/ios/ipa/*.ipa
 
     publishing:
       app_store_connect:
+        # conteúdo do .p8 que você colocou na variável
         api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        # ID da chave (KEY ID)
         key_id: $APP_STORE_CONNECT_KEY_ID
+        # Issuer ID
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+
         submit_to_testflight: true
         submit_to_app_store: false
