@@ -7,6 +7,8 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
+      groups:
+        - ios_signing        # mesmo nome do grupo das variáveis na UI
 
     ios_signing:
       distribution_type: app_store
@@ -23,15 +25,15 @@ workflows:
 
       - name: Build iOS (IPA assinado)
         script: |
-          flutter build ipa --release --no-codesign
+          flutter build ipa --release
 
     artifacts:
-      - build/ios/ipa/*.ipa
+      - build/ios/ipa/*.ipa   # caminho relativo, a partir da raiz do projeto
 
     publishing:
       app_store_connect:
-        api_key_id: $APP_STORE_CONNECT_KEY_ID
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_ID
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
-        api_key_path: $APP_STORE_CONNECT_API_KEY     # Caminho do arquivo .p8
         submit_to_testflight: true
         submit_to_app_store: false
