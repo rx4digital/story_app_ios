@@ -7,10 +7,12 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
+      groups:
+        - ios_signing        # mesmo nome do grupo das variáveis na UI
 
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.rx4digital.storyapp
+    ios_signing:
+      distribution_type: app_store
+      bundle_identifier: com.rx4digital.storyapp
 
     scripts:
       - name: Set up code signing settings on Xcode project
@@ -26,8 +28,7 @@ workflows:
           flutter build ipa --release
 
     artifacts:
-      - $CM_BUILD_DIR/build/ios/ipa/*.ipa
-
+      - build/ios/ipa/*.ipa   # caminho relativo, a partir da raiz do projeto
 
     publishing:
       app_store_connect:
