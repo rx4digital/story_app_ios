@@ -7,13 +7,12 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
+      groups:
+        - ios_signing
 
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.rx4digital.storyapp
-
-      groups:
-        - ios_signing
 
     scripts:
       - name: Set up code signing settings on Xcode project
