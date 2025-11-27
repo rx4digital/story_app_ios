@@ -7,22 +7,37 @@ workflows:
     environment:
       flutter: stable
       xcode: latest
+      vars:
+        BUNDLE_ID: com.rx4digital.storyapp
       groups:
         - ios_signing
 
-    ios_signing:
-      distribution_type: app_store
-      bundle_identifier: com.rx4digital.storyapp
-      apple_id: $APPLE_ID
-      app_store_connect_issuer_id: $APP_STORE_ISSUER_ID
-      app_store_connect_key_identifier: $APP_STORE_KEY_ID
-      app_store_connect_private_key: $APP_STORE_PRIVATE_KEY
-
     scripts:
-      - name: Build IPA
+      - name: Set up keychain
+        script: |
+          keychain initialize
+
+      - name: Fetch signing files from App Store Connect
+        script: |
+          app-store-connect fetch-signing-files "$BUNDLE_ID" \
+            --type IOS_APP_STORE \
+            --create
+
+      - name: Add certificates to keychain
+        script: |
+          keychain add-certificates
+
+      - name: Use provisioning profiles in Xcode project
+        script: |
+          xcode-project use-profiles
+
+      - name: Flutter pub get
         script: |
           flutter pub get
-          flutter build ipa --release --no-codesign
+
+      - name: Build IPA
+        script: |
+          flutter build ipa --release
 
     artifacts:
       - build/ios/ipa/*.ipa
