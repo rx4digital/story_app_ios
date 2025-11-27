@@ -15,6 +15,7 @@ class StoryApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         useMaterial3: true,
+        fontFamily: 'Roboto',
       ),
       home: const HomePage(),
     );
