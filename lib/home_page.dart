@@ -1,9 +1,16 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
+
+// listas de dicas
+import 'data/home_tips/tips_dicas_pos_servico.dart'
+    show tipsDicasPosServico;
+import 'data/home_tips/tips_ideias_storys.dart'
+    show tipsIdeiasStorys;
+
 import 'missao_do_dia_page.dart';
 import 'brinde_da_semana_page.dart';
 
 class HomePage extends StatelessWidget {
-  /// Apenas pra exibir no header. Pode trocar depois.
   final String userName;
   final bool isPro;
 
@@ -13,25 +20,121 @@ class HomePage extends StatelessWidget {
     this.isPro = false,
   });
 
-  // Snack de "em breve"
   void _comingSoon(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Em breve ✨'),
-      ),
+      const SnackBar(content: Text('Em breve ✨')),
     );
   }
 
-  // Navegação genérica
   void _open(BuildContext context, Widget page) {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => page),
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => page));
+  }
+
+  Future<void> _openTipsPopup(
+      BuildContext context, {
+        required String titulo,
+        required List<String> itens,
+      }) async {
+    final random = Random();
+    final shuffled = List<String>.from(itens)..shuffle(random);
+
+    int index = 0;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return Dialog(
+              backgroundColor: const Color(0xFF141A21),
+              insetPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.lightbulb, color: Colors.amber, size: 22),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            titulo,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(Icons.close_rounded, color: Colors.white70),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        shuffled[index],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(color: Colors.white.withOpacity(.2)),
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            onPressed: index == 0 ? null : () => setState(() => index--),
+                            child: const Text("Voltar"),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFFFF9900),
+                              foregroundColor: Colors.black,
+                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                            ),
+                            onPressed: () {
+                              if (index < shuffled.length - 1) {
+                                setState(() => index++);
+                              } else {
+                                Navigator.pop(ctx);
+                              }
+                            },
+                            child: Text(index < shuffled.length - 1 ? "Próxima" : "Fechar"),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    // 🎨 Paleta
     const bg = Color(0xFF0F1318);
     const cardDark = Color(0xFF141A21);
     const listDark = Color(0xFF10161C);
@@ -39,7 +142,6 @@ class HomePage extends StatelessWidget {
     const orangeB = Color(0xFFFF9900);
     const red = Color(0xFFE23D2E);
 
-    // Badge PRO / FREE
     Widget versionBadge() => Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
@@ -48,14 +150,10 @@ class HomePage extends StatelessWidget {
       ),
       child: Text(
         isPro ? 'PRO' : 'FREE',
-        style: const TextStyle(
-          color: Colors.white,
-          fontWeight: FontWeight.bold,
-        ),
+        style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
       ),
     );
 
-    // Botão laranja grande (lado a lado)
     Widget bigOrange(String title, IconData icon, VoidCallback onTap) {
       return Expanded(
         child: InkWell(
@@ -71,11 +169,7 @@ class HomePage extends StatelessWidget {
               ),
               borderRadius: BorderRadius.circular(16),
               boxShadow: const [
-                BoxShadow(
-                  color: Colors.black38,
-                  blurRadius: 16,
-                  offset: Offset(0, 6),
-                ),
+                BoxShadow(color: Colors.black38, blurRadius: 16, offset: Offset(0, 6)),
               ],
             ),
             padding: const EdgeInsets.all(16),
@@ -91,11 +185,7 @@ class HomePage extends StatelessWidget {
                       fontSize: 18,
                       fontWeight: FontWeight.w800,
                       shadows: [
-                        Shadow(
-                          color: Colors.black54,
-                          blurRadius: 6,
-                          offset: Offset(0, 1),
-                        ),
+                        Shadow(color: Colors.black54, blurRadius: 6, offset: Offset(0, 1)),
                       ],
                     ),
                   ),
@@ -107,7 +197,6 @@ class HomePage extends StatelessWidget {
       );
     }
 
-    // Botão laranja largo
     Widget wideOrange(String title, VoidCallback onTap) {
       return InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -122,28 +211,19 @@ class HomePage extends StatelessWidget {
             ),
             borderRadius: BorderRadius.circular(16),
             boxShadow: const [
-              BoxShadow(
-                color: Colors.black38,
-                blurRadius: 16,
-                offset: Offset(0, 6),
-              ),
+              BoxShadow(color: Colors.black38, blurRadius: 16, offset: Offset(0, 6)),
             ],
           ),
           alignment: Alignment.centerLeft,
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: Text(
             title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 18,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w800),
           ),
         ),
       );
     }
 
-    // Botão de lista escuro
     Widget darkListButton(
         String title, {
           String? subtitle,
@@ -159,13 +239,7 @@ class HomePage extends StatelessWidget {
           decoration: BoxDecoration(
             color: listDark,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black26,
-                blurRadius: 8,
-                offset: Offset(0, 3),
-              ),
-            ],
+            boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 8, offset: Offset(0, 3))],
           ),
           padding: const EdgeInsets.symmetric(horizontal: 18),
           child: Row(
@@ -175,37 +249,22 @@ class HomePage extends StatelessWidget {
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    Text(title,
+                        style: const TextStyle(
+                            color: Colors.white, fontSize: 16, fontWeight: FontWeight.w600)),
                     if (subtitle != null)
-                      Text(
-                        subtitle,
-                        style: TextStyle(
-                          color: Colors.white.withOpacity(0.7),
-                          fontSize: 13,
-                        ),
-                      ),
+                      Text(subtitle,
+                          style: TextStyle(color: Colors.white.withOpacity(0.7), fontSize: 13)),
                   ],
                 ),
               ),
-              Icon(
-                icon,
-                color: Colors.white.withOpacity(0.8),
-                size: 18,
-              ),
+              Icon(icon, color: Colors.white.withOpacity(0.8), size: 18),
             ],
           ),
         ),
       );
     }
 
-    // Botão vermelho de configurações
     Widget redButton(String title, VoidCallback onTap) {
       return InkWell(
         borderRadius: BorderRadius.circular(16),
@@ -216,22 +275,12 @@ class HomePage extends StatelessWidget {
           decoration: BoxDecoration(
             color: red,
             borderRadius: BorderRadius.circular(16),
-            boxShadow: const [
-              BoxShadow(
-                color: Colors.black45,
-                blurRadius: 12,
-                offset: Offset(0, 5),
-              ),
-            ],
+            boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 12, offset: Offset(0, 5))],
           ),
           alignment: Alignment.center,
           child: Text(
             title,
-            style: const TextStyle(
-              color: Colors.white,
-              fontSize: 17,
-              fontWeight: FontWeight.w800,
-            ),
+            style: const TextStyle(color: Colors.white, fontSize: 17, fontWeight: FontWeight.w800),
           ),
         ),
       );
@@ -243,18 +292,12 @@ class HomePage extends StatelessWidget {
         child: ListView(
           padding: const EdgeInsets.all(20),
           children: [
-            // Cabeçalho
+            // HEADER
             Container(
               decoration: BoxDecoration(
                 color: cardDark,
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: const [
-                  BoxShadow(
-                    color: Colors.black26,
-                    blurRadius: 12,
-                    offset: Offset(0, 5),
-                  ),
-                ],
+                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 12, offset: Offset(0, 5))],
               ),
               padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
               child: Column(
@@ -270,10 +313,7 @@ class HomePage extends StatelessWidget {
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
                           style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 22,
-                            fontWeight: FontWeight.w800,
-                          ),
+                              color: Colors.white, fontSize: 22, fontWeight: FontWeight.w800),
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -295,64 +335,50 @@ class HomePage extends StatelessWidget {
 
             const SizedBox(height: 16),
 
-            // dois botões laranja
+            // BOTÕES LARANJA GRANDES
             Row(
               children: [
-                bigOrange(
-                  'Missão do Dia',
-                  Icons.event_available_rounded,
-                      () => _open(context, const MissaoDoDiaPage()),
-                ),
+                bigOrange('Missão do Dia', Icons.event_available_rounded,
+                        () => _open(context, const MissaoDoDiaPage())),
                 const SizedBox(width: 12),
-                bigOrange(
-                  'Brinde da Semana',
-                  Icons.card_giftcard_rounded,
-                      () => _open(context, const BrindeDaSemanaPage()),
-                ),
+                bigOrange('Brinde da Semana', Icons.card_giftcard_rounded,
+                        () => _open(context, const BrindeDaSemanaPage())),
               ],
             ),
 
             const SizedBox(height: 12),
 
-            // Laboratório (laranja largo)
-            wideOrange(
-              '💡 Ideias para trazer Engajamento',
-                  () => _comingSoon(context),
-            ),
+            // LARANJA LARGO
+            wideOrange('💡 Ideias para trazer Engajamento', () => _comingSoon(context)),
 
             const SizedBox(height: 18),
 
-            // lista escura
-            darkListButton(
-              '🚨 Socorro! Preciso Postar!',
-              onTap: () => _comingSoon(context),
-            ),
-            darkListButton(
-              '💰 Atraia Novos Clientes',
-              onTap: () => _comingSoon(context),
-            ),
+            darkListButton('🚨 Socorro! Preciso Postar!', onTap: () => _comingSoon(context)),
+            darkListButton('💰 Atraia Novos Clientes', onTap: () => _comingSoon(context)),
+
             darkListButton(
               '🤝 Stories Pós-Atendimento',
-              onTap: () => _comingSoon(context),
-            ),
-            darkListButton(
-              '💡 Ideia Rápida de Story',
-              onTap: () => _comingSoon(context),
-            ),
-            darkListButton(
-              '🚀 Modo Turbo de Storys',
-              onTap: () => _comingSoon(context),
-            ),
-            darkListButton(
-              '🤖 Crie com a IA (inteligência artificial)',
-              onTap: () => _comingSoon(context),
+              onTap: () => _openTipsPopup(
+                context,
+                titulo: '🤝 Stories Pós-Atendimento',
+                itens: tipsDicasPosServico,
+              ),
             ),
 
-            // Configurações (vermelho)
-            redButton(
-              'Configurações do App',
-                  () => _comingSoon(context),
+            darkListButton(
+              '💡 Ideia Rápida de Story',
+              onTap: () => _openTipsPopup(
+                context,
+                titulo: '💡 Ideia Rápida de Story',
+                itens: tipsIdeiasStorys,
+              ),
             ),
+
+            darkListButton('🚀 Modo Turbo de Storys', onTap: () => _comingSoon(context)),
+            darkListButton('🤖 Crie com a IA (inteligência artificial)',
+                onTap: () => _comingSoon(context)),
+
+            redButton('Configurações do App', () => _comingSoon(context)),
           ],
         ),
       ),
