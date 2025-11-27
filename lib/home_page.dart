@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'missao_do_dia_page.dart';
+import 'brinde_da_semana_page.dart';
 
 class HomePage extends StatelessWidget {
   /// Apenas pra exibir no header. Pode trocar depois.
@@ -17,6 +19,13 @@ class HomePage extends StatelessWidget {
       const SnackBar(
         content: Text('Em breve ✨'),
       ),
+    );
+  }
+
+  // Navegação genérica
+  void _open(BuildContext context, Widget page) {
+    Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => page),
     );
   }
 
@@ -292,13 +301,13 @@ class HomePage extends StatelessWidget {
                 bigOrange(
                   'Missão do Dia',
                   Icons.event_available_rounded,
-                      () => _comingSoon(context),
+                      () => _open(context, const MissaoDoDiaPage()),
                 ),
                 const SizedBox(width: 12),
                 bigOrange(
                   'Brinde da Semana',
                   Icons.card_giftcard_rounded,
-                      () => _comingSoon(context),
+                      () => _open(context, const BrindeDaSemanaPage()),
                 ),
               ],
             ),
