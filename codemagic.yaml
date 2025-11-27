@@ -10,24 +10,19 @@ workflows:
       groups:
         - ios_signing
 
-      ios_signing:
-        distribution_type: app_store
-        bundle_identifier: com.rx4digital.storyapp
+    ios_signing:
+      distribution_type: app_store
+      bundle_identifier: com.rx4digital.storyapp
+      apple_id: $APPLE_ID
+      app_store_connect_issuer_id: $APP_STORE_ISSUER_ID
+      app_store_connect_key_identifier: $APP_STORE_KEY_ID
+      app_store_connect_private_key: $APP_STORE_PRIVATE_KEY
 
     scripts:
       - name: Build IPA
         script: |
-          flutter clean
           flutter pub get
-          flutter build ipa --release
+          flutter build ipa --release --no-codesign
 
     artifacts:
       - build/ios/ipa/*.ipa
-
-    publishing:
-      app_store_connect:
-        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
-        key_id: $APP_STORE_CONNECT_KEY_ID
-        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
-        submit_to_testflight: true
-        submit_to_app_store: false
