@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:flutter/material.dart';
 
 // DICAS
@@ -25,87 +26,135 @@ class LaboratorioEngajamentoPage extends StatelessWidget {
   static const _blueB = Color(0xFF103641);
   static const _red = Color(0xFFE23D2E);
 
-  // ====== pop-up genérico de dicas ======
-  void _showTipsSheet(
+  // ====== POPUP (uma dica por vez) ======
+  Future<void> _showTipsPopup(
       BuildContext context, {
         required String title,
         required List<String> tips,
-      }) {
-    showModalBottomSheet(
+      }) async {
+    if (tips.isEmpty) return;
+
+    // embaralha as dicas pra não ficar sempre igual
+    final random = Random();
+    final shuffled = List<String>.from(tips)..shuffle(random);
+    int index = 0;
+
+    await showDialog(
       context: context,
-      backgroundColor: const Color(0xFF121821),
-      isScrollControlled: true,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(22)),
-      ),
+      barrierDismissible: true,
       builder: (ctx) {
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.7,
-          minChildSize: 0.4,
-          maxChildSize: 0.9,
-          builder: (_, scrollController) {
-            return Padding(
-              padding: const EdgeInsets.fromLTRB(18, 14, 18, 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.lightbulb,
-                          color: Colors.amber, size: 22),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          title,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 18,
-                            fontWeight: FontWeight.w800,
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return Dialog(
+              backgroundColor: const Color(0xFF141A21),
+              insetPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Cabeçalho
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.lightbulb,
+                          color: Colors.amber,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            title,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        icon: const Icon(Icons.close_rounded,
-                            color: Colors.white70),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Expanded(
-                    child: ListView.separated(
-                      controller: scrollController,
-                      itemCount: tips.length,
-                      separatorBuilder: (_, __) =>
-                      const SizedBox(height: 10),
-                      itemBuilder: (_, i) {
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '${i + 1}. ',
-                              style: const TextStyle(
-                                color: Colors.amber,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                            Expanded(
-                              child: Text(
-                                tips[i],
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 15,
-                                  height: 1.35,
-                                ),
-                              ),
-                            ),
-                          ],
-                        );
-                      },
+                        IconButton(
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 10),
+
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        shuffled[index],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: Colors.white.withOpacity(.2),
+                              ),
+                              foregroundColor: Colors.white,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: index == 0
+                                ? null
+                                : () => setState(() => index--),
+                            child: const Text('Voltar'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFFFF9900),
+                              foregroundColor: Colors.black,
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: () {
+                              if (index < shuffled.length - 1) {
+                                setState(() => index++);
+                              } else {
+                                Navigator.pop(ctx);
+                              }
+                            },
+                            child: Text(
+                              index < shuffled.length - 1
+                                  ? 'Próxima'
+                                  : 'Fechar',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                ),
               ),
             );
           },
@@ -143,9 +192,10 @@ class LaboratorioEngajamentoPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(18),
             boxShadow: const [
               BoxShadow(
-                  color: Colors.black54,
-                  blurRadius: 12,
-                  offset: Offset(0, 6))
+                color: Colors.black54,
+                blurRadius: 12,
+                offset: Offset(0, 6),
+              )
             ],
           ),
           alignment: Alignment.center,
@@ -175,9 +225,10 @@ class LaboratorioEngajamentoPage extends StatelessWidget {
           borderRadius: BorderRadius.circular(18),
           boxShadow: const [
             BoxShadow(
-                color: Colors.black54,
-                blurRadius: 12,
-                offset: Offset(0, 6))
+              color: Colors.black54,
+              blurRadius: 12,
+              offset: Offset(0, 6),
+            )
           ],
         ),
         alignment: Alignment.center,
@@ -228,9 +279,10 @@ class LaboratorioEngajamentoPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(18),
         boxShadow: const [
           BoxShadow(
-              color: Colors.black45,
-              blurRadius: 10,
-              offset: Offset(0, 5))
+            color: Colors.black45,
+            blurRadius: 10,
+            offset: Offset(0, 5),
+          )
         ],
       ),
       alignment: Alignment.center,
@@ -259,19 +311,19 @@ class LaboratorioEngajamentoPage extends StatelessWidget {
             Row(
               children: [
                 _pillOrange(
-                  '💖 Story que Toca o Coração',
-                      () => _showTipsSheet(
+                  '💖 Story Emocionante',
+                      () => _showTipsPopup(
                     context,
-                    title: '💖 Story que Toca o Coração',
+                    title: '💖 Story Emocionante',
                     tips: storyEmocionalTips,
                   ),
                 ),
                 const SizedBox(width: 14),
                 _pillOrange(
-                  '📊 Story que Mede Reação',
-                      () => _showTipsSheet(
+                  '📊 Story Termômetro',
+                      () => _showTipsPopup(
                     context,
-                    title: '📊 Story que Mede Reação',
+                    title: '📊 Story Termômetro',
                     tips: storyMedirContaTips,
                   ),
                 ),
@@ -282,7 +334,7 @@ class LaboratorioEngajamentoPage extends StatelessWidget {
             // Laranja largo
             _wideOrange(
               '🎭 Desafio: Mostre sem Mostrar',
-                  () => _showTipsSheet(
+                  () => _showTipsPopup(
                 context,
                 title: '🎭 Desafio: Mostre sem Mostrar',
                 tips: desafioContarSemMostrarTips,
@@ -293,7 +345,7 @@ class LaboratorioEngajamentoPage extends StatelessWidget {
             // Azul-petróleo – todos com pop-up
             _darkButton(
               '🗨️ Story pra Gerar Conversa',
-                  () => _showTipsSheet(
+                  () => _showTipsPopup(
                 context,
                 title: '🗨️ Story pra Gerar Conversa',
                 tips: storysParaInteragirTips,
@@ -303,7 +355,7 @@ class LaboratorioEngajamentoPage extends StatelessWidget {
 
             _darkButton(
               '⚡ Comece o Story de forma Simples',
-                  () => _showTipsSheet(
+                  () => _showTipsPopup(
                 context,
                 title: '⚡ Comece o Story de forma Simples',
                 tips: storysCurtosParaComecarTips,
@@ -313,7 +365,7 @@ class LaboratorioEngajamentoPage extends StatelessWidget {
 
             _darkButton(
               '🚀 Story pra Bombar o Engajamento',
-                  () => _showTipsSheet(
+                  () => _showTipsPopup(
                 context,
                 title: '🚀 Story pra Bombar o Engajamento',
                 tips: queroEngajarPelosStorysTips,
@@ -323,7 +375,7 @@ class LaboratorioEngajamentoPage extends StatelessWidget {
 
             _darkButton(
               '👀 Story que Segura a Atenção',
-                  () => _showTipsSheet(
+                  () => _showTipsPopup(
                 context,
                 title: '👀 Story que Segura a Atenção',
                 tips: storiesQuePrendemTips,

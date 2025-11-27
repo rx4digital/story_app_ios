@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import 'sobre_rayanne_page.dart';
 
 class ConfiguracoesPage extends StatelessWidget {
   const ConfiguracoesPage({super.key});
@@ -14,6 +17,82 @@ class ConfiguracoesPage extends StatelessWidget {
     );
   }
 
+  void _toast(BuildContext context, String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg)),
+    );
+  }
+
+  Future<void> _abrirUrl(BuildContext context, String url) async {
+    final uri = Uri.parse(url);
+    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!ok && context.mounted) {
+      _toast(context, 'Não foi possível abrir o link.');
+    }
+  }
+
+  void _showIdiomaRegiaoSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: _card,
+      isScrollControlled: false,
+      showDragHandle: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: const EdgeInsets.fromLTRB(16, 10, 16, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Row(
+                children: [
+                  Icon(Icons.public_rounded, color: Colors.white),
+                  SizedBox(width: 10),
+                  Text(
+                    'Idioma e região',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w900,
+                      fontSize: 16,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Novas opções em breve. Padrão atual: Português (BR)',
+                style: TextStyle(color: Colors.white70),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color(0xFF3A4B59),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 14),
+                  ),
+                  child: const Text(
+                    'Fechar',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w800,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -24,7 +103,10 @@ class ConfiguracoesPage extends StatelessWidget {
         iconTheme: const IconThemeData(color: Colors.white),
         title: const Text(
           'Configurações do App',
-          style: TextStyle(color: Colors.white, fontWeight: FontWeight.w900),
+          style: TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.w900,
+          ),
         ),
       ),
       body: ListView(
@@ -37,6 +119,12 @@ class ConfiguracoesPage extends StatelessWidget {
             label: 'Conta e perfil',
             onTap: () => _comingSoon(context),
           ),
+          _tile(
+            context,
+            icon: Icons.subscriptions_rounded,
+            label: 'Planos e assinaturas',
+            onTap: () => _comingSoon(context),
+          ),
           const SizedBox(height: 18),
 
           _sectionTitle('Preferências'),
@@ -44,12 +132,12 @@ class ConfiguracoesPage extends StatelessWidget {
             context,
             icon: Icons.public_rounded,
             label: 'Idioma e região',
-            onTap: () => _comingSoon(context),
+            onTap: () => _showIdiomaRegiaoSheet(context),
           ),
           _tile(
             context,
-            icon: Icons.privacy_tip_rounded,
-            label: 'Permissões do app',
+            icon: Icons.notifications_active_rounded,
+            label: 'Notificações',
             onTap: () => _comingSoon(context),
           ),
           const SizedBox(height: 18),
@@ -65,7 +153,16 @@ class ConfiguracoesPage extends StatelessWidget {
             context,
             icon: Icons.info_rounded,
             label: 'Sobre o app',
-            onTap: () => _comingSoon(context),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (_) => SobreRayannePage(
+                    image: const AssetImage('assets/rayanne.jpg'),
+                  ),
+                ),
+              );
+            },
           ),
           const SizedBox(height: 18),
 
@@ -74,20 +171,15 @@ class ConfiguracoesPage extends StatelessWidget {
             context,
             icon: Icons.lightbulb_rounded,
             label: 'Sugestões para o app',
-            onTap: () => _comingSoon(context),
+            onTap: () => _abrirUrl(
+              context,
+              'https://www.rx4digital.com.br/storyfeito',
+            ),
           ),
           _tile(
             context,
-            icon: Icons.share_rounded,
-            label: 'Compartilhar app',
-            onTap: () => _comingSoon(context),
-          ),
-          const SizedBox(height: 18),
-
-          _tileDanger(
-            context,
-            icon: Icons.logout_rounded,
-            label: 'Sair da conta',
+            icon: Icons.help_outline_rounded,
+            label: 'Central de ajuda',
             onTap: () => _comingSoon(context),
           ),
         ],
@@ -131,33 +223,9 @@ class ConfiguracoesPage extends StatelessWidget {
             fontWeight: FontWeight.w700,
           ),
         ),
-        trailing:
-        const Icon(Icons.chevron_right_rounded, color: Colors.white),
-        onTap: onTap,
-      ),
-    );
-  }
-
-  Widget _tileDanger(
-      BuildContext context, {
-        required IconData icon,
-        required String label,
-        required VoidCallback onTap,
-      }) {
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF201216),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Color(0xFF4A2027)),
-      ),
-      child: ListTile(
-        leading: Icon(icon, color: Colors.red.shade300),
-        title: Text(
-          label,
-          style: TextStyle(
-            color: Colors.red.shade200,
-            fontWeight: FontWeight.w800,
-          ),
+        trailing: const Icon(
+          Icons.chevron_right_rounded,
+          color: Colors.white,
         ),
         onTap: onTap,
       ),
