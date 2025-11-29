@@ -10,6 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
+  audioplayers: ^6.0.0   # ou a versão mais recente do pub.dev
   cupertino_icons: ^1.0.8
 
   # IA (Gemini)
@@ -24,8 +25,8 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
-
   assets:
     - assets/dicas_missao.json
     - assets/brinde_semana.json
     - assets/rayanne.jpg
+    - assets/sounds/roulette_spin.mp3
