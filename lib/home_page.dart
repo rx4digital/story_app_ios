@@ -1,5 +1,7 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'ia_page.dart';
+
 
 // listas de dicas
 import 'data/home_tips/tips_dicas_pos_servico.dart'
@@ -518,7 +520,7 @@ class HomePage extends StatelessWidget {
             ),
             darkListButton(
               '🤖 Crie com a IA (inteligência artificial)',
-              onTap: () => _comingSoon(context),
+              onTap: () => _open(context, const InteligenciaArtificialPage()),
             ),
 
             // Configurações (vermelho)
