@@ -2,7 +2,7 @@ name: story_app
 description: App de teste para rodar no iOS usando Codemagic
 publish_to: "none"
 
-version: 1.2.77+23
+version: 1.2.78+24
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -30,3 +30,4 @@ flutter:
     - assets/brinde_semana.json
     - assets/rayanne.jpg
     - assets/sounds/roulette_spin.mp3
+    - assets/audio/piano/
