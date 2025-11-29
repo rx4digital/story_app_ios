@@ -159,6 +159,7 @@ class MeSalvaPage extends StatelessWidget {
     const darkItem = Color(0xFF0F1B22);
     const goldA = Color(0xFFF4A21A);
     const goldB = Color(0xFFDB8B08);
+    const red = Color(0xFFE23D2E); // cor do botão de voltar
 
     return Scaffold(
       backgroundColor: bg,
@@ -269,6 +270,37 @@ class MeSalvaPage extends StatelessWidget {
               itens: cd.tips,
             ),
             child: _darkItem('🎯 Combo Imbatível', darkItem),
+          ),
+
+          const SizedBox(height: 26),
+
+          // 🔴 BOTÃO VERMELHO PARA VOLTAR À HOME
+          InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () => Navigator.pop(context),
+            child: Container(
+              height: 66,
+              decoration: BoxDecoration(
+                color: red,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: const [
+                  BoxShadow(
+                    color: Colors.black45,
+                    blurRadius: 12,
+                    offset: Offset(0, 6),
+                  ),
+                ],
+              ),
+              alignment: Alignment.center,
+              child: const Text(
+                'Voltar à página inicial',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.w800,
+                ),
+              ),
+            ),
           ),
         ],
       ),

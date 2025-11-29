@@ -136,8 +136,8 @@ class ConfiguracoesPage extends StatelessWidget {
           ),
           _tile(
             context,
-            icon: Icons.notifications_active_rounded,
-            label: 'Notificações',
+            icon: Icons.privacy_tip_rounded,
+            label: 'Permissões do App',
             onTap: () => _comingSoon(context),
           ),
           const SizedBox(height: 18),
@@ -178,8 +178,8 @@ class ConfiguracoesPage extends StatelessWidget {
           ),
           _tile(
             context,
-            icon: Icons.help_outline_rounded,
-            label: 'Central de ajuda',
+            icon: Icons.share_rounded,
+            label: 'Compartilhar app',
             onTap: () => _comingSoon(context),
           ),
         ],

@@ -311,10 +311,10 @@ class LaboratorioEngajamentoPage extends StatelessWidget {
             Row(
               children: [
                 _pillOrange(
-                  '💖 Story Emocionante',
+                  '💖 Story Emocional',
                       () => _showTipsPopup(
                     context,
-                    title: '💖 Story Emocionante',
+                    title: '💖 Story Emocional',
                     tips: storyEmocionalTips,
                   ),
                 ),
