@@ -1,6 +1,7 @@
 // lib/modo_story_full_page.dart
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:story_app/roleta_storys_page.dart';
 
 // DICAS – cada arquivo exporta uma lista com nome específico
 import 'data/tips/story_full/desafio_relampago_tips.dart' as d33;
@@ -198,7 +199,7 @@ class ModoStoryFullPage extends StatelessWidget {
                 Expanded(
                   child: InkWell(
                     borderRadius: BorderRadius.circular(18),
-                    onTap: () => _comingSoon(context),
+                    onTap: () => _comingSoon(context), // este ainda é em breve
                     child: _pillOrange(text: '🎮 Modo Jogo'),
                   ),
                 ),
@@ -206,12 +207,20 @@ class ModoStoryFullPage extends StatelessWidget {
                 Expanded(
                   child: InkWell(
                     borderRadius: BorderRadius.circular(18),
-                    onTap: () => _comingSoon(context),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const RoletaStorysPage(),
+                        ),
+                      );
+                    },
                     child: _pillOrange(text: '🎡 Roleta de Ideias'),
                   ),
                 ),
               ],
             ),
+
             const SizedBox(height: 16),
 
             // lembretes (em breve)
