@@ -1,4 +1,11 @@
+// lib/modo_story_full_page.dart
+import 'dart:math';
 import 'package:flutter/material.dart';
+
+// DICAS – cada arquivo exporta uma lista com nome específico
+import 'data/tips/story_full/desafio_relampago_tips.dart' as d33;
+import 'data/tips/story_full/roteiro_surpresa_tips.dart' as rad;
+import 'data/tips/story_full/story_sem_desculpa_tips.dart' as ssd;
 
 class ModoStoryFullPage extends StatelessWidget {
   const ModoStoryFullPage({super.key});
@@ -15,6 +22,143 @@ class ModoStoryFullPage extends StatelessWidget {
       const SnackBar(content: Text('Em breve ✨')),
     );
   }
+
+  // ---------- POPUP REUTILIZÁVEL DE DICAS ----------
+  Future<void> _showTipsPopup(
+      BuildContext context, {
+        required String titulo,
+        required List<String> itens,
+      }) async {
+    if (itens.isEmpty) return;
+
+    final random = Random();
+    final shuffled = List<String>.from(itens)..shuffle(random);
+    int index = 0;
+
+    await showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return Dialog(
+              backgroundColor: const Color(0xFF141A21),
+              insetPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Cabeçalho
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.lightbulb,
+                          color: Colors.amber,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            titulo,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
+                          ),
+                        ),
+                        IconButton(
+                          splashRadius: 20,
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+
+                    // Texto da dica
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        shuffled[index],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          height: 1.35,
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    // Navegação
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: Colors.white.withOpacity(.2),
+                              ),
+                              foregroundColor: Colors.white,
+                              padding:
+                              const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed:
+                            index == 0 ? null : () => setState(() => index--),
+                            child: const Text('Voltar'),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFFFF9900),
+                              foregroundColor: Colors.black,
+                              padding:
+                              const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                            ),
+                            onPressed: () {
+                              if (index < shuffled.length - 1) {
+                                setState(() => index++);
+                              } else {
+                                Navigator.pop(ctx);
+                              }
+                            },
+                            child: Text(
+                              index < shuffled.length - 1
+                                  ? 'Próxima'
+                                  : 'Fechar',
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+  // --------------------------------------------------
 
   @override
   Widget build(BuildContext context) {
@@ -48,6 +192,7 @@ class ModoStoryFullPage extends StatelessWidget {
               ),
             ),
 
+            // duas pílulas laranja (ainda "em breve")
             Row(
               children: [
                 Expanded(
@@ -69,6 +214,7 @@ class ModoStoryFullPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
+            // lembretes (em breve)
             InkWell(
               borderRadius: BorderRadius.circular(18),
               onTap: () => _comingSoon(context),
@@ -76,6 +222,7 @@ class ModoStoryFullPage extends StatelessWidget {
             ),
             const SizedBox(height: 20),
 
+            // Quiz (em breve)
             InkWell(
               borderRadius: BorderRadius.circular(18),
               onTap: () => _comingSoon(context),
@@ -83,27 +230,43 @@ class ModoStoryFullPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
+            // ⚡ Desafio Relâmpago – POP-UP
             InkWell(
               borderRadius: BorderRadius.circular(18),
-              onTap: () => _comingSoon(context),
+              onTap: () => _showTipsPopup(
+                context,
+                titulo: '⚡ Desafio Relâmpago',
+                itens: d33.desafio3x3Tips,
+              ),
               child: _darkButton(text: '⚡ Desafio Relâmpago'),
             ),
             const SizedBox(height: 12),
 
+            // 🧨 Roteiro Surpresa – POP-UP
             InkWell(
               borderRadius: BorderRadius.circular(18),
-              onTap: () => _comingSoon(context),
+              onTap: () => _showTipsPopup(
+                context,
+                titulo: '🧨 Roteiro Surpresa',
+                itens: rad.roteiroAutodestruiTips,
+              ),
               child: _darkButton(text: '🧨 Roteiro Surpresa'),
             ),
             const SizedBox(height: 12),
 
+            // 🚀 Sem Desculpas! Posta Logo! – POP-UP
             InkWell(
               borderRadius: BorderRadius.circular(18),
-              onTap: () => _comingSoon(context),
+              onTap: () => _showTipsPopup(
+                context,
+                titulo: '🚀 Sem Desculpas! Posta Logo!',
+                itens: ssd.storySemDesculpaTips,
+              ),
               child: _darkButton(text: '🚀 Sem Desculpas! Posta Logo!'),
             ),
             const SizedBox(height: 26),
 
+            // voltar
             InkWell(
               onTap: () => Navigator.pop(context),
               borderRadius: BorderRadius.circular(18),
@@ -137,6 +300,7 @@ class ModoStoryFullPage extends StatelessWidget {
     );
   }
 
+  // ==== componentes visuais ====
   static Widget _pillOrange({required String text}) {
     return Container(
       height: 100,
