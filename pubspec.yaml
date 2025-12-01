@@ -2,7 +2,7 @@ name: story_app
 description: App de teste para rodar no iOS usando Codemagic
 publish_to: "none"
 
-version: 1.2.186+33
+version: 1.2.187+34
 
 environment:
   sdk: ">=3.4.0 <4.0.0"

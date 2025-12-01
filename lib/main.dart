@@ -1,15 +1,11 @@
-// lib/main.dart
-
 import 'package:flutter/material.dart';
 import 'home_page.dart';
-
-// Serviço de notificações
 import 'services/notification_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializa o sistema de notificações (iOS)
+  // Inicializa notificações (vai pedir permissão no iOS na primeira vez)
   await NotificationService.instance.initialize();
 
   runApp(const StoryApp());

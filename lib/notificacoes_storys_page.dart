@@ -58,20 +58,36 @@ class _NotificacoesStorysPageState extends State<NotificacoesStorysPage> {
     await prefs.setString(_kFreq, _freq);
   }
 
+  /// Aplica as mudanças: salva no SharedPreferences
+  /// e dispara/cancela notificações.
+  ///
+  /// Por enquanto, quando ligar, manda uma notificação imediatamente
+  /// (só pra testar). Depois você pode evoluir pra agendadas.
   Future<void> _applyNotificationChanges() async {
-    // salva primeiro
+    // salva as preferências
     await _savePrefs();
 
-    // agenda/cancela de acordo com o estado
     if (_enabled) {
-      await NotificationService.instance.scheduleRandomStoryNotification(
-        hour: _time.hour,
-        minute: _time.minute,
-        tips: storyNotificationTips,
-        frequency: _freq,
+      // aqui você poderia no futuro chamar um "schedule..."
+      // por enquanto, enviamos uma notificação de teste:
+      await NotificationService.instance.showRandomTipNow();
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lembretes ativados. Notificação de teste enviada ✨'),
+        ),
       );
     } else {
-      await NotificationService.instance.cancelStoryNotifications();
+      // cancela todas as notificações locais
+      await NotificationService.instance.cancelAll();
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Lembretes desativados.'),
+        ),
+      );
     }
   }
 
@@ -273,6 +289,31 @@ class _NotificacoesStorysPageState extends State<NotificacoesStorysPage> {
                 height: 1.4,
               ),
             ),
+
+            const SizedBox(height: 24),
+
+            // Botão extra para testar manualmente uma notificação
+            ElevatedButton.icon(
+              onPressed: () async {
+                await NotificationService.instance.showRandomTipNow();
+                if (!mounted) return;
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content:
+                    Text('Notificação de teste enviada com sucesso ✅'),
+                  ),
+                );
+              },
+              icon: const Icon(Icons.notifications_active),
+              label: const Text('Testar notificação agora'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.orange,
+                foregroundColor: Colors.black,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -301,9 +342,8 @@ class _ChipOption extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
-          color: selected
-              ? const Color(0xFFFFA43A)
-              : const Color(0xFF151B23),
+          color:
+          selected ? const Color(0xFFFFA43A) : const Color(0xFF151B23),
           border: Border.all(
             color: selected
                 ? const Color(0xFFFFC27A)
