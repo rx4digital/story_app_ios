@@ -1,12 +1,15 @@
 // lib/modo_story_full_page.dart
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:story_app/roleta_storys_page.dart';
 
-// DICAS – cada arquivo exporta uma lista com nome específico
-import 'data/tips/story_full/desafio_relampago_tips.dart' as d33;
-import 'data/tips/story_full/roteiro_surpresa_tips.dart' as rad;
-import 'data/tips/story_full/story_sem_desculpa_tips.dart' as ssd;
+// Telas
+import 'dica_musical_page.dart';
+import 'roleta_storys_page.dart';
+
+// Dicas (cada arquivo exporta uma lista específica)
+import 'data/tips/story_full/desafio_relampago_tips.dart' as d33; // d33.desafio3x3Tips
+import 'data/tips/story_full/roteiro_surpresa_tips.dart' as rad; // rad.roteiroAutodestruiTips
+import 'data/tips/story_full/story_sem_desculpa_tips.dart' as ssd; // ssd.storySemDesculpaTips
 
 class ModoStoryFullPage extends StatelessWidget {
   const ModoStoryFullPage({super.key});
@@ -18,13 +21,7 @@ class ModoStoryFullPage extends StatelessWidget {
   static const _blueB = Color(0xFF103641);
   static const _red = Color(0xFFE23D2E);
 
-  void _comingSoon(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Em breve ✨')),
-    );
-  }
-
-  // ---------- POPUP REUTILIZÁVEL DE DICAS ----------
+  // ---------- POPUP REUTILIZÁVEL PARA AS DICAS ----------
   Future<void> _showTipsPopup(
       BuildContext context, {
         required String titulo,
@@ -32,6 +29,7 @@ class ModoStoryFullPage extends StatelessWidget {
       }) async {
     if (itens.isEmpty) return;
 
+    // embaralha um pouco pra não ficar sempre igual
     final random = Random();
     final shuffled = List<String>.from(itens)..shuffle(random);
     int index = 0;
@@ -85,7 +83,6 @@ class ModoStoryFullPage extends StatelessWidget {
                     ),
                     const SizedBox(height: 6),
 
-                    // Texto da dica
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -110,14 +107,16 @@ class ModoStoryFullPage extends StatelessWidget {
                                 color: Colors.white.withOpacity(.2),
                               ),
                               foregroundColor: Colors.white,
-                              padding:
-                              const EdgeInsets.symmetric(vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            onPressed:
-                            index == 0 ? null : () => setState(() => index--),
+                            onPressed: index == 0
+                                ? null
+                                : () => setState(() => index--),
                             child: const Text('Voltar'),
                           ),
                         ),
@@ -127,8 +126,9 @@ class ModoStoryFullPage extends StatelessWidget {
                             style: FilledButton.styleFrom(
                               backgroundColor: const Color(0xFFFF9900),
                               foregroundColor: Colors.black,
-                              padding:
-                              const EdgeInsets.symmetric(vertical: 12),
+                              padding: const EdgeInsets.symmetric(
+                                vertical: 12,
+                              ),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -159,7 +159,13 @@ class ModoStoryFullPage extends StatelessWidget {
       },
     );
   }
-  // --------------------------------------------------
+  // ------------------------------------------------------
+
+  void _comingSoon(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Em breve ✨')),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -193,17 +199,27 @@ class ModoStoryFullPage extends StatelessWidget {
               ),
             ),
 
-            // duas pílulas laranja (ainda "em breve")
+            // ===== duas pílulas laranja =====
             Row(
               children: [
+                // Piano / Modo Jogo
                 Expanded(
                   child: InkWell(
                     borderRadius: BorderRadius.circular(18),
-                    onTap: () => _comingSoon(context), // este ainda é em breve
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (_) => const DicaMusicalPage(),
+                        ),
+                      );
+                    },
                     child: _pillOrange(text: '🎮 Modo Jogo'),
                   ),
                 ),
                 const SizedBox(width: 16),
+
+                // Roleta dos Storys
                 Expanded(
                   child: InkWell(
                     borderRadius: BorderRadius.circular(18),
@@ -220,10 +236,9 @@ class ModoStoryFullPage extends StatelessWidget {
                 ),
               ],
             ),
-
             const SizedBox(height: 16),
 
-            // lembretes (em breve)
+            // Lembretes (ainda em breve)
             InkWell(
               borderRadius: BorderRadius.circular(18),
               onTap: () => _comingSoon(context),
@@ -239,7 +254,7 @@ class ModoStoryFullPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // ⚡ Desafio Relâmpago – POP-UP
+            // ⚡ Desafio Relâmpago – POPUP
             InkWell(
               borderRadius: BorderRadius.circular(18),
               onTap: () => _showTipsPopup(
@@ -251,7 +266,7 @@ class ModoStoryFullPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // 🧨 Roteiro Surpresa – POP-UP
+            // 🧨 Roteiro Surpresa – POPUP
             InkWell(
               borderRadius: BorderRadius.circular(18),
               onTap: () => _showTipsPopup(
@@ -263,7 +278,7 @@ class ModoStoryFullPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            // 🚀 Sem Desculpas! Posta Logo! – POP-UP
+            // 🚀 Sem Desculpas! Posta Logo! – POPUP
             InkWell(
               borderRadius: BorderRadius.circular(18),
               onTap: () => _showTipsPopup(
@@ -275,7 +290,7 @@ class ModoStoryFullPage extends StatelessWidget {
             ),
             const SizedBox(height: 26),
 
-            // voltar
+            // Voltar
             InkWell(
               onTap: () => Navigator.pop(context),
               borderRadius: BorderRadius.circular(18),
@@ -310,6 +325,7 @@ class ModoStoryFullPage extends StatelessWidget {
   }
 
   // ==== componentes visuais ====
+
   static Widget _pillOrange({required String text}) {
     return Container(
       height: 100,
