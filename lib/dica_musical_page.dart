@@ -41,13 +41,13 @@ class _DicaMusicalPageState extends State<DicaMusicalPage> {
   // Exemplo esperado:
   // assets/audio/piano/c.mp3, d.mp3, e.mp3, ...
   final Map<String, String> _noteToAsset = const {
-    'C': 'audio/piano/c.mp3',
-    'D': 'audio/piano/d.mp3',
-    'E': 'audio/piano/e.mp3',
-    'F': 'audio/piano/f.mp3',
-    'G': 'audio/piano/g.mp3',
-    'A': 'audio/piano/a.mp3',
-    'B': 'audio/piano/b.mp3',
+    'C': 'audio/piano/C.mp3',
+    'D': 'audio/piano/D.mp3',
+    'E': 'audio/piano/E.mp3',
+    'F': 'audio/piano/F.mp3',
+    'G': 'audio/piano/G.mp3',
+    'A': 'audio/piano/A3.mp3',
+    'B': 'audio/piano/B3.mp3',
     'Chigh': 'audio/piano/chigh.mp3',
     // sustenidos
     'Csus': 'audio/piano/CSus.mp3',
