@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 // Telas
 import 'dica_musical_page.dart';
 import 'roleta_storys_page.dart';
-import 'quiz_engajamento_page.dart'; // <--- ADICIONADO AQUI
+import 'quiz_engajamento_page.dart';
 
 // Dicas (cada arquivo exporta uma lista específica)
 import 'data/tips/story_full/desafio_relampago_tips.dart' as d33;
@@ -22,7 +22,7 @@ class ModoStoryFullPage extends StatelessWidget {
   static const _blueB = Color(0xFF103641);
   static const _red = Color(0xFFE23D2E);
 
-  // ---------- POPUP ----------
+  // ---------- POPUP REUTILIZÁVEL PARA AS DICAS ----------
   Future<void> _showTipsPopup(
       BuildContext context, {
         required String titulo,
@@ -38,109 +38,125 @@ class ModoStoryFullPage extends StatelessWidget {
       context: context,
       barrierDismissible: true,
       builder: (ctx) {
-        return StatefulBuilder(builder: (ctx, setState) {
-          return Dialog(
-            backgroundColor: const Color(0xFF141A21),
-            insetPadding:
-            const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    children: [
-                      const Icon(Icons.lightbulb,
-                          color: Colors.amber, size: 22),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          titulo,
-                          style: const TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w800,
+        return StatefulBuilder(
+          builder: (ctx, setState) {
+            return Dialog(
+              backgroundColor: const Color(0xFF141A21),
+              insetPadding:
+              const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 14, 16, 14),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.lightbulb,
+                          color: Colors.amber,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            titulo,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 16,
+                              fontWeight: FontWeight.w800,
+                            ),
                           ),
                         ),
-                      ),
-                      IconButton(
-                        splashRadius: 20,
-                        onPressed: () => Navigator.pop(ctx),
-                        icon: const Icon(Icons.close_rounded,
-                            color: Colors.white70),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Align(
-                    alignment: Alignment.centerLeft,
-                    child: Text(
-                      shuffled[index],
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 15,
-                        height: 1.35,
+                        IconButton(
+                          splashRadius: 20,
+                          onPressed: () => Navigator.pop(ctx),
+                          icon: const Icon(
+                            Icons.close_rounded,
+                            color: Colors.white70,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        shuffled[index],
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 15,
+                          height: 1.35,
+                        ),
                       ),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: OutlinedButton(
-                          style: OutlinedButton.styleFrom(
-                            side: BorderSide(
-                              color: Colors.white.withOpacity(.2),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: OutlinedButton(
+                            style: OutlinedButton.styleFrom(
+                              side: BorderSide(
+                                color: Colors.white.withOpacity(.2),
+                              ),
+                              foregroundColor: Colors.white,
+                              padding:
+                              const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
+                            onPressed: index == 0
+                                ? null
+                                : () => setState(() => index--),
+                            child: const Text('Voltar'),
                           ),
-                          onPressed: index == 0
-                              ? null
-                              : () => setState(() => index--),
-                          child: const Text('Voltar'),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: FilledButton(
-                          style: FilledButton.styleFrom(
-                            backgroundColor: const Color(0xFFFF9900),
-                            foregroundColor: Colors.black,
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 12,
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: FilledButton(
+                            style: FilledButton.styleFrom(
+                              backgroundColor: const Color(0xFFFF9900),
+                              foregroundColor: Colors.black,
+                              padding:
+                              const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
                             ),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
-                          onPressed: () {
-                            if (index < shuffled.length - 1) {
-                              setState(() => index++);
-                            } else {
-                              Navigator.pop(ctx);
-                            }
-                          },
-                          child: Text(
+                            onPressed: () {
+                              if (index < shuffled.length - 1) {
+                                setState(() => index++);
+                              } else {
+                                Navigator.pop(ctx);
+                              }
+                            },
+                            child: Text(
                               index < shuffled.length - 1
                                   ? 'Próxima'
-                                  : 'Fechar'),
+                                  : 'Fechar',
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                ),
               ),
-            ),
-          );
-        });
+            );
+          },
+        );
       },
+    );
+  }
+  // ------------------------------------------------------
+
+  void _comingSoon(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Em breve ✨')),
     );
   }
 
@@ -176,6 +192,7 @@ class ModoStoryFullPage extends StatelessWidget {
               ),
             ),
 
+            // ===== duas pílulas laranja =====
             Row(
               children: [
                 Expanded(
@@ -185,7 +202,8 @@ class ModoStoryFullPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => const DicaMusicalPage()),
+                          builder: (_) => const DicaMusicalPage(),
+                        ),
                       );
                     },
                     child: _pillOrange(text: '🎮 Modo Jogo'),
@@ -199,7 +217,8 @@ class ModoStoryFullPage extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                            builder: (_) => const RoletaStorysPage()),
+                          builder: (_) => const RoletaStorysPage(),
+                        ),
                       );
                     },
                     child: _pillOrange(text: '🎡 Roleta de Ideias'),
@@ -211,11 +230,20 @@ class ModoStoryFullPage extends StatelessWidget {
 
             InkWell(
               borderRadius: BorderRadius.circular(18),
+              onTap: () => _comingSoon(context),
+              child: _wideOrange(text: '🔔 Lembretes de Fazer Storys'),
+            ),
+            const SizedBox(height: 20),
+
+            // AGORA CHAMA O QUIZ
+            InkWell(
+              borderRadius: BorderRadius.circular(18),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (_) => const QuizEngajamentoPage()),
+                    builder: (_) => const QuizEngajamentoPage(),
+                  ),
                 );
               },
               child: _darkButton(text: '❓ Quiz do Engajamento'),
@@ -310,6 +338,33 @@ class ModoStoryFullPage extends StatelessWidget {
         style: const TextStyle(
           color: Colors.black,
           fontSize: 24,
+          fontWeight: FontWeight.w800,
+        ),
+      ),
+    );
+  }
+
+  static Widget _wideOrange({required String text}) {
+    return Container(
+      height: 72,
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(colors: [_orangeA, _orangeB]),
+        borderRadius: BorderRadius.circular(18),
+        boxShadow: const [
+          BoxShadow(
+            color: Colors.black54,
+            blurRadius: 12,
+            offset: Offset(0, 6),
+          ),
+        ],
+      ),
+      alignment: Alignment.center,
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: const TextStyle(
+          color: Colors.black,
+          fontSize: 22,
           fontWeight: FontWeight.w800,
         ),
       ),
