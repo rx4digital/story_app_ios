@@ -1,9 +1,9 @@
-import 'dart:math';
+// lib/notificacoes_storys_page.dart
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
-// Dicas de lembretes
-import 'data/story_notification_tips.dart'
-as notif_tips; // notif_tips.storyNotificationsTips
+import 'services/notification_service.dart';
+import 'data/story_notification_tips.dart';
 
 class NotificacoesStorysPage extends StatefulWidget {
   const NotificacoesStorysPage({super.key});
@@ -14,282 +14,263 @@ class NotificacoesStorysPage extends StatefulWidget {
 }
 
 class _NotificacoesStorysPageState extends State<NotificacoesStorysPage> {
-  // Estados básicos
-  bool _enabled = true;
-  String _intensidade = 'moderado'; // 'leve' | 'moderado' | 'intenso'
-  bool _soEmDiasUteis = true;
-  bool _lembretesDeManha = true;
-  bool _lembretesATarde = false;
-  bool _lembretesAnoite = false;
+  // chaves usadas no SharedPreferences
+  static const _kEnabled = 'story_notif_enabled';
+  static const _kHour = 'story_notif_hour';
+  static const _kMinute = 'story_notif_minute';
+  static const _kFreq = 'story_notif_freq';
 
-  late String _previewTip;
+  bool _enabled = false;
+  TimeOfDay _time = const TimeOfDay(hour: 10, minute: 0);
+  String _freq = 'diario'; // 'diario', '2x_dia', 'semanal'
+
+  bool _loading = true;
 
   @override
   void initState() {
     super.initState();
-    _previewTip = _pickRandomTip();
+    _loadPrefs();
   }
 
-  String _pickRandomTip() {
-    final list = notif_tips.storyNotificationTips;
-    if (list.isEmpty) {
-      return 'Você vai receber lembretes com ideias de story, ganchos e mini-desafios para gravar mais. ✨';
-    }
-    final rnd = Random();
-    return list[rnd.nextInt(list.length)];
-  }
+  Future<void> _loadPrefs() async {
+    final prefs = await SharedPreferences.getInstance();
 
-  void _refreshPreview() {
+    final savedEnabled = prefs.getBool(_kEnabled);
+    final savedHour = prefs.getInt(_kHour);
+    final savedMinute = prefs.getInt(_kMinute);
+    final savedFreq = prefs.getString(_kFreq);
+
     setState(() {
-      _previewTip = _pickRandomTip();
+      _enabled = savedEnabled ?? false;
+      if (savedHour != null && savedMinute != null) {
+        _time = TimeOfDay(hour: savedHour, minute: savedMinute);
+      }
+      _freq = savedFreq ?? 'diario';
+      _loading = false;
     });
+  }
+
+  Future<void> _savePrefs() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_kEnabled, _enabled);
+    await prefs.setInt(_kHour, _time.hour);
+    await prefs.setInt(_kMinute, _time.minute);
+    await prefs.setString(_kFreq, _freq);
+  }
+
+  Future<void> _applyNotificationChanges() async {
+    // salva primeiro
+    await _savePrefs();
+
+    // agenda/cancela de acordo com o estado
+    if (_enabled) {
+      await NotificationService.instance.scheduleRandomStoryNotification(
+        hour: _time.hour,
+        minute: _time.minute,
+        tips: storyNotificationTips,
+        frequency: _freq,
+      );
+    } else {
+      await NotificationService.instance.cancelStoryNotifications();
+    }
+  }
+
+  Future<void> _pickTime() async {
+    final picked = await showTimePicker(
+      context: context,
+      initialTime: _time,
+    );
+    if (picked == null) return;
+    setState(() => _time = picked);
+    await _applyNotificationChanges();
+  }
+
+  void _onToggle(bool value) async {
+    setState(() => _enabled = value);
+    await _applyNotificationChanges();
+  }
+
+  void _onChangeFreq(String value) async {
+    setState(() => _freq = value);
+    await _applyNotificationChanges();
   }
 
   @override
   Widget build(BuildContext context) {
-    const bg = Color(0xFF0E1217);
-    const card = Color(0xFF151A23);
-    const accent = Color(0xFFFFA51E);
-    const red = Color(0xFFE23D2E);
+    const bg = Color(0xFF0D1116);
 
     return Scaffold(
       backgroundColor: bg,
       appBar: AppBar(
         backgroundColor: bg,
-        elevation: 0,
         foregroundColor: Colors.white,
+        elevation: 0,
         title: const Text(
-          '🔔 Lembretes de Storys',
+          'Lembretes de Storys',
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
       ),
-      body: SafeArea(
+      body: _loading
+          ? const Center(
+        child: CircularProgressIndicator(
+          valueColor: AlwaysStoppedAnimation(Colors.orange),
+        ),
+      )
+          : SafeArea(
         child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 12, 20, 24),
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
           children: [
-            const Text(
-              'Deixe o Story Feito te lembrar de aparecer com frequência, com ideias prontas para gravar.',
-              style: TextStyle(
-                color: Color(0xFFCFD7E3),
-                fontSize: 14,
-                height: 1.4,
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: const Color(0xFF151B23),
+                borderRadius: BorderRadius.circular(18),
+                border:
+                Border.all(color: Colors.white.withOpacity(0.06)),
+              ),
+              child: const Text(
+                'Ative os lembretes para receber ideias de storys, '
+                    'ganchos e desafios ao longo do dia. Tudo focado em '
+                    'te lembrar de aparecer e engajar.',
+                style: TextStyle(
+                  color: Color(0xFFCFD8E3),
+                  fontSize: 15,
+                  height: 1.4,
+                ),
+              ),
+            ),
+            const SizedBox(height: 18),
+
+            // switch principal
+            SwitchListTile.adaptive(
+              value: _enabled,
+              onChanged: _onToggle,
+              activeColor: Colors.orange,
+              title: const Text(
+                'Receber lembretes',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                  fontSize: 16,
+                ),
+              ),
+              subtitle: Text(
+                _enabled
+                    ? 'As notificações estão ativas.'
+                    : 'Nenhum lembrete será enviado.',
+                style: const TextStyle(
+                  color: Color(0xFF8FA0B3),
+                  fontSize: 13,
+                ),
               ),
             ),
             const SizedBox(height: 16),
 
-            // Cartão principal (status)
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: card,
-                borderRadius: BorderRadius.circular(18),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.06),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Container(
-                    height: 42,
-                    width: 42,
-                    decoration: BoxDecoration(
-                      color: const Color(0xFF1E2531),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: const Icon(
-                      Icons.notifications_active_rounded,
-                      color: accent,
-                    ),
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Text(
-                      _enabled
-                          ? 'Lembretes ligados — você receberá notificações com ideias de story.'
-                          : 'Lembretes desligados — você não receberá notificações.',
-                      style: const TextStyle(
+            Opacity(
+              opacity: _enabled ? 1 : 0.4,
+              child: IgnorePointer(
+                ignoring: !_enabled,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Horário preferido',
+                      style: TextStyle(
                         color: Colors.white,
-                        fontSize: 14,
-                        height: 1.35,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 8),
-                  Switch.adaptive(
-                    value: _enabled,
-                    activeColor: accent,
-                    onChanged: (v) {
-                      setState(() => _enabled = v);
-                      // aqui depois você pode salvar em SharedPreferences
-                    },
-                  ),
-                ],
-              ),
-            ),
-
-            const SizedBox(height: 22),
-
-            // Intensidade
-            const Text(
-              'Frequência dos lembretes',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                _ChipOption(
-                  label: 'Leve (3x/semana)',
-                  selected: _intensidade == 'leve',
-                  onTap: _enabled
-                      ? () => setState(() => _intensidade = 'leve')
-                      : null,
-                ),
-                _ChipOption(
-                  label: 'Moderado (1x/dia)',
-                  selected: _intensidade == 'moderado',
-                  onTap: _enabled
-                      ? () => setState(() => _intensidade = 'moderado')
-                      : null,
-                ),
-                _ChipOption(
-                  label: 'Intenso (2–3x/dia)',
-                  selected: _intensidade == 'intenso',
-                  onTap: _enabled
-                      ? () => setState(() => _intensidade = 'intenso')
-                      : null,
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 18),
-
-            const Text(
-              'Horários preferidos',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 16,
-                fontWeight: FontWeight.w800,
-              ),
-            ),
-            const SizedBox(height: 8),
-
-            _SwitchConfigTile(
-              title: 'Somente em dias úteis',
-              subtitle: 'De segunda a sexta',
-              value: _soEmDiasUteis,
-              enabled: _enabled,
-              onChanged: (v) {
-                setState(() => _soEmDiasUteis = v);
-              },
-            ),
-            _SwitchConfigTile(
-              title: 'Manhã (8h – 11h)',
-              value: _lembretesDeManha,
-              enabled: _enabled,
-              onChanged: (v) {
-                setState(() => _lembretesDeManha = v);
-              },
-            ),
-            _SwitchConfigTile(
-              title: 'Tarde (13h – 17h)',
-              value: _lembretesATarde,
-              enabled: _enabled,
-              onChanged: (v) {
-                setState(() => _lembretesATarde = v);
-              },
-            ),
-            _SwitchConfigTile(
-              title: 'Noite (18h – 21h)',
-              value: _lembretesAnoite,
-              enabled: _enabled,
-              onChanged: (v) {
-                setState(() => _lembretesAnoite = v);
-              },
-            ),
-
-            const SizedBox(height: 22),
-
-            // Preview de notificação
-            Row(
-              children: [
-                const Text(
-                  'Exemplo de lembrete',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
-                const Spacer(),
-                TextButton(
-                  onPressed: _refreshPreview,
-                  child: const Text(
-                    'Trocar exemplo',
-                    style: TextStyle(color: accent),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Container(
-              padding: const EdgeInsets.all(14),
-              decoration: BoxDecoration(
-                color: const Color(0xFF161B26),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: Colors.white.withOpacity(0.05),
-                ),
-              ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Icon(
-                    Icons.notifications_rounded,
-                    color: accent,
-                  ),
-                  const SizedBox(width: 10),
-                  Expanded(
-                    child: Text(
-                      _previewTip,
-                      style: const TextStyle(
-                        color: Color(0xFFE4ECF5),
-                        fontSize: 14,
-                        height: 1.4,
+                    const SizedBox(height: 8),
+                    InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: _pickTime,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 14,
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF151B23),
+                          borderRadius: BorderRadius.circular(14),
+                          border: Border.all(
+                            color: Colors.white.withOpacity(0.08),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisAlignment:
+                          MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              '${_time.hour.toString().padLeft(2, '0')}:${_time.minute.toString().padLeft(2, '0')}',
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 18,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            const Icon(Icons.access_time,
+                                color: Colors.white70),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                ],
+                    const SizedBox(height: 18),
+
+                    const Text(
+                      'Frequência',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        _ChipOption(
+                          label: '1x por dia',
+                          selected: _freq == 'diario',
+                          onTap: () => _onChangeFreq('diario'),
+                        ),
+                        _ChipOption(
+                          label: '2x por dia',
+                          selected: _freq == '2x_dia',
+                          onTap: () => _onChangeFreq('2x_dia'),
+                        ),
+                        _ChipOption(
+                          label: 'Algumas vezes na semana',
+                          selected: _freq == 'semanal',
+                          onTap: () => _onChangeFreq('semanal'),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
             ),
+            const SizedBox(height: 24),
 
-            const SizedBox(height: 28),
-
-            // Botão voltar
-            SizedBox(
-              width: double.infinity,
-              height: 56,
-              child: ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: red,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(18),
-                  ),
-                ),
-                onPressed: () => Navigator.of(context).pop(),
-                child: const Text(
-                  'Voltar à página inicial',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 17,
-                    fontWeight: FontWeight.w800,
-                  ),
-                ),
+            const Text(
+              'O que vou receber?',
+              style: TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w800,
+                fontSize: 16,
+              ),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              '• Ideias rápidas de story\n'
+                  '• Lembretes para mostrar bastidores\n'
+                  '• Ganchos de abertura prontos\n'
+                  '• Frases de CTA pra usar na hora',
+              style: TextStyle(
+                color: Color(0xFF9CB3C9),
+                height: 1.4,
               ),
             ),
           ],
@@ -299,11 +280,11 @@ class _NotificacoesStorysPageState extends State<NotificacoesStorysPage> {
   }
 }
 
-/// Chip customizado para seleção de intensidade
+// --- chipzinho de seleção de frequência ----
 class _ChipOption extends StatelessWidget {
   final String label;
   final bool selected;
-  final VoidCallback? onTap;
+  final VoidCallback onTap;
 
   const _ChipOption({
     required this.label,
@@ -313,96 +294,29 @@ class _ChipOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bg = selected
-        ? const LinearGradient(
-      colors: [Color(0xFFF5A623), Color(0xFFFF8C3B)],
-      begin: Alignment.topCenter,
-      end: Alignment.bottomCenter,
-    )
-        : const LinearGradient(
-      colors: [Color(0xFF151A23), Color(0xFF151A23)],
-    );
-
-    final textColor = selected ? Colors.black : const Color(0xFFE4ECF5);
-
     return InkWell(
       borderRadius: BorderRadius.circular(999),
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          gradient: bg,
           borderRadius: BorderRadius.circular(999),
+          color: selected
+              ? const Color(0xFFFFA43A)
+              : const Color(0xFF151B23),
           border: Border.all(
             color: selected
-                ? Colors.transparent
-                : Colors.white.withOpacity(0.08),
+                ? const Color(0xFFFFC27A)
+                : Colors.white.withOpacity(0.15),
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: textColor,
+            color: selected ? Colors.black : Colors.white,
             fontWeight: FontWeight.w700,
             fontSize: 13,
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Tile de configuração com switch
-class _SwitchConfigTile extends StatelessWidget {
-  final String title;
-  final String? subtitle;
-  final bool value;
-  final bool enabled;
-  final ValueChanged<bool> onChanged;
-
-  const _SwitchConfigTile({
-    required this.title,
-    this.subtitle,
-    required this.value,
-    required this.enabled,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    const card = Color(0xFF151A23);
-
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: Colors.white.withOpacity(0.05),
-        ),
-      ),
-      child: ListTile(
-        enabled: enabled,
-        title: Text(
-          title,
-          style: const TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-          ),
-        ),
-        subtitle: subtitle == null
-            ? null
-            : Text(
-          subtitle!,
-          style: const TextStyle(
-            color: Color(0xFF9CB3C9),
-            fontSize: 13,
-          ),
-        ),
-        trailing: Switch.adaptive(
-          value: value,
-          activeColor: const Color(0xFFFFA51E),
-          onChanged: enabled ? onChanged : null,
         ),
       ),
     );
