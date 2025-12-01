@@ -1,12 +1,11 @@
 // lib/dica_musical_page.dart
 import 'dart:math';
-import 'package:audioplayers/audioplayers.dart';
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show HapticFeedback;
+import 'package:audioplayers/audioplayers.dart';
 
 // Dicas específicas do piano
-import 'data/piano_tips.dart' as tips;
+import '../data/piano_tips.dart' as tips;
 
 class DicaMusicalPage extends StatefulWidget {
   const DicaMusicalPage({Key? key}) : super(key: key);
@@ -16,7 +15,7 @@ class DicaMusicalPage extends StatefulWidget {
 }
 
 class _DicaMusicalPageState extends State<DicaMusicalPage> {
-  // Notas brancas/pretas usadas no layout
+  // Notas do teclado
   final List<String> _whiteOrder = const [
     'C',
     'D',
@@ -36,25 +35,27 @@ class _DicaMusicalPageState extends State<DicaMusicalPage> {
     _BlackSlot(afterWhiteIndex: 5, note: 'Asus'),
   ];
 
-  /// Mapeia a **nota lógica** para o nome exato do arquivo de áudio
-  /// de acordo com a pasta assets/audio/piano
-  static const Map<String, String> _noteToFile = {
-    'C': 'C.mp3',
-    'D': 'D.mp3',
-    'E': 'E.mp3',
-    'F': 'F.mp3',
-    'G': 'G.mp3',
-    'A': 'A3.mp3',
-    'B': 'B3.mp3',
-    'Chigh': 'C3.mp3',
-    'Csus': 'CSus.mp3',
-    'Dsus': 'DSus.mp3',
-    'Fsus': 'FSus.mp3',
-    'Gsus': 'GSus.mp3',
-    'Asus': 'A3Sus.mp3',
-  };
-
+  // Player de áudio
   final AudioPlayer _player = AudioPlayer();
+
+  // Mapa nota -> arquivo em assets/audio/piano
+  static const Map<String, String> _noteToAsset = {
+    'C': 'assets/audio/piano/C.mp3',
+    'D': 'assets/audio/piano/D.mp3',
+    'E': 'assets/audio/piano/E.mp3',
+    'F': 'assets/audio/piano/F.mp3',
+    'G': 'assets/audio/piano/G.mp3',
+    'A': 'assets/audio/piano/A3.mp3', // usando A3.mp3
+    'B': 'assets/audio/piano/B3.mp3',
+    'Chigh': 'assets/audio/piano/C3.mp3',
+
+    // Pretas
+    'Csus': 'assets/audio/piano/CSus.mp3',
+    'Dsus': 'assets/audio/piano/DSus.mp3',
+    'Fsus': 'assets/audio/piano/FSus.mp3',
+    'Gsus': 'assets/audio/piano/GSus.mp3',
+    'Asus': 'assets/audio/piano/A3Sus.mp3',
+  };
 
   int _taps = 0;
   int _tipIndex = 0;
@@ -73,35 +74,35 @@ class _DicaMusicalPageState extends State<DicaMusicalPage> {
       ]);
 
   @override
+  void initState() {
+    super.initState();
+    // Volume máximo e modo simples (toca a nota toda e para)
+    _player.setVolume(1.0); // 0.0 a 1.0
+    _player.setReleaseMode(ReleaseMode.stop);
+  }
+
+  @override
   void dispose() {
     _player.dispose();
     super.dispose();
   }
 
   Future<void> _playNote(String note) async {
-    // feedback tátil
     HapticFeedback.selectionClick();
     setState(() => _lastPlayed = note);
 
-    // Toca o áudio correspondente, se existir
-    final fileName = _noteToFile[note];
-    if (fileName != null) {
+    final path = _noteToAsset[note];
+    if (path != null) {
       try {
-        // garante que o player não fique sobrepondo sons
+        // garante que a nota anterior pare antes de tocar a próxima
         await _player.stop();
-        await _player.play(
-          AssetSource('audio/piano/$fileName'),
-        );
-      } catch (e, s) {
-        if (kDebugMode) {
-          // loga apenas em debug
-          // ignore: avoid_print
-          print('[PIANO] Erro ao tocar nota $note: $e\n$s');
-        }
+        await _player.play(AssetSource(path.replaceFirst('assets/', '')));
+        // AssetSource espera caminho relativo à pasta "assets/"
+      } catch (_) {
+        // se der algum erro, só ignora o áudio e segue a vida
       }
     }
 
-    // contador de toques para disparar a dica
     _taps++;
     if (_taps >= 3) {
       _taps = 0;
@@ -123,8 +124,9 @@ class _DicaMusicalPageState extends State<DicaMusicalPage> {
       builder: (ctx) {
         return Dialog(
           backgroundColor: const Color(0xFF101015),
-          shape:
-          RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(18),
+          ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(20, 20, 20, 14),
             child: Column(
@@ -157,7 +159,8 @@ class _DicaMusicalPageState extends State<DicaMusicalPage> {
                   style: FilledButton.styleFrom(
                     backgroundColor: Colors.orange,
                     shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12)),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
                   icon: const Icon(Icons.check_circle_outline,
                       color: Colors.white),
@@ -219,8 +222,10 @@ class _DicaMusicalPageState extends State<DicaMusicalPage> {
                     builder: (ctx, cons) {
                       final w = cons.maxWidth;
                       final h = cons.maxHeight;
-                      final whiteKeyW = (w - 16) / _whiteOrder.length;
-                      final whiteKeyH = min(h * .75, 360.0);
+                      final whiteKeyW =
+                          (w - 16) / _whiteOrder.length;
+                      final whiteKeyH =
+                      min(h * .75, 360.0);
                       final blackKeyH = whiteKeyH * .62;
 
                       return Center(
@@ -236,10 +241,13 @@ class _DicaMusicalPageState extends State<DicaMusicalPage> {
                                 children: [
                                   for (final note in _whiteOrder)
                                     _GlossyWhiteKey(
-                                      label:
-                                      note == 'Chigh' ? 'C' : note,
-                                      active: _lastPlayed == note,
-                                      onTap: () => _playNote(note),
+                                      label: note == 'Chigh'
+                                          ? 'C'
+                                          : note,
+                                      active:
+                                      _lastPlayed == note,
+                                      onTap: () =>
+                                          _playNote(note),
                                     ),
                                 ],
                               ),
@@ -256,8 +264,8 @@ class _DicaMusicalPageState extends State<DicaMusicalPage> {
                   ),
                 ),
                 Padding(
-                  padding:
-                  const EdgeInsets.fromLTRB(16, 10, 16, 16),
+                  padding: const EdgeInsets.fromLTRB(
+                      16, 10, 16, 16),
                   child: SizedBox(
                     width: double.infinity,
                     child: ElevatedButton.icon(
@@ -268,14 +276,19 @@ class _DicaMusicalPageState extends State<DicaMusicalPage> {
                       label: const Text(
                         'Voltar',
                         style: TextStyle(
-                            color: Colors.white, fontSize: 16),
+                          color: Colors.white,
+                          fontSize: 16,
+                        ),
                       ),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFE53935),
-                        padding: const EdgeInsets.symmetric(
+                        backgroundColor:
+                        const Color(0xFFE53935),
+                        padding:
+                        const EdgeInsets.symmetric(
                             vertical: 14),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(14),
+                          borderRadius:
+                          BorderRadius.circular(14),
                         ),
                       ),
                     ),
@@ -343,7 +356,8 @@ class _HeaderCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 14),
+      padding:
+      const EdgeInsets.symmetric(horizontal: 14),
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
@@ -375,8 +389,6 @@ class _HeaderCard extends StatelessWidget {
   }
 }
 
-// --- Teclas e confete (mesmo que o seu código anterior) ---
-
 class _GlossyWhiteKey extends StatefulWidget {
   final String label;
   final bool active;
@@ -388,18 +400,23 @@ class _GlossyWhiteKey extends StatefulWidget {
   });
 
   @override
-  State<_GlossyWhiteKey> createState() => _GlossyWhiteKeyState();
+  State<_GlossyWhiteKey> createState() =>
+      _GlossyWhiteKeyState();
 }
 
 class _GlossyWhiteKeyState extends State<_GlossyWhiteKey>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 90));
+  late final AnimationController _ctrl =
+  AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 90),
+  );
   late final Animation<double> _scale =
   Tween<double>(begin: 1, end: .985).animate(_ctrl);
 
   @override
-  void didUpdateWidget(covariant _GlossyWhiteKey oldWidget) {
+  void didUpdateWidget(
+      covariant _GlossyWhiteKey oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.active && !oldWidget.active) {
       _ctrl.forward(from: 0).then((_) => _ctrl.reverse());
@@ -416,20 +433,25 @@ class _GlossyWhiteKeyState extends State<_GlossyWhiteKey>
   Widget build(BuildContext context) {
     return Expanded(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2.0),
+        padding:
+        const EdgeInsets.symmetric(horizontal: 2.0),
         child: GestureDetector(
           onTap: widget.onTap,
           child: ScaleTransition(
             scale: _scale,
             child: Container(
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(
+                borderRadius:
+                const BorderRadius.vertical(
                   bottom: Radius.circular(10),
                 ),
                 gradient: const LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [Color(0xFFEDEEF3), Color(0xFFDADCE6)],
+                  colors: [
+                    Color(0xFFEDEEF3),
+                    Color(0xFFDADCE6),
+                  ],
                 ),
                 boxShadow: const [
                   BoxShadow(
@@ -438,7 +460,8 @@ class _GlossyWhiteKeyState extends State<_GlossyWhiteKey>
                     offset: Offset(0, 6),
                   ),
                 ],
-                border: Border.all(color: Colors.black, width: 1),
+                border: Border.all(
+                    color: Colors.black, width: 1),
               ),
               child: Stack(
                 children: [
@@ -449,14 +472,16 @@ class _GlossyWhiteKeyState extends State<_GlossyWhiteKey>
                     height: 18,
                     child: Container(
                       decoration: BoxDecoration(
-                        borderRadius: const BorderRadius.vertical(
+                        borderRadius:
+                        const BorderRadius.vertical(
                           bottom: Radius.circular(12),
                         ),
                         gradient: LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            Colors.white.withOpacity(.55),
+                            Colors.white
+                                .withOpacity(.55),
                             Colors.transparent,
                           ],
                         ),
@@ -466,7 +491,8 @@ class _GlossyWhiteKeyState extends State<_GlossyWhiteKey>
                   Align(
                     alignment: Alignment.bottomCenter,
                     child: Padding(
-                      padding: const EdgeInsets.only(bottom: 6),
+                      padding: const EdgeInsets.only(
+                          bottom: 6),
                       child: Text(
                         widget.label,
                         style: const TextStyle(
@@ -490,21 +516,29 @@ class _GlossyWhiteKeyState extends State<_GlossyWhiteKey>
 class _GlossyBlackKey extends StatefulWidget {
   final bool active;
   final VoidCallback onTap;
-  const _GlossyBlackKey({required this.active, required this.onTap});
+  const _GlossyBlackKey({
+    required this.active,
+    required this.onTap,
+  });
 
   @override
-  State<_GlossyBlackKey> createState() => _GlossyBlackKeyState();
+  State<_GlossyBlackKey> createState() =>
+      _GlossyBlackKeyState();
 }
 
 class _GlossyBlackKeyState extends State<_GlossyBlackKey>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _ctrl = AnimationController(
-      vsync: this, duration: const Duration(milliseconds: 90));
+  late final AnimationController _ctrl =
+  AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 90),
+  );
   late final Animation<double> _scale =
   Tween<double>(begin: 1, end: .985).animate(_ctrl);
 
   @override
-  void didUpdateWidget(covariant _GlossyBlackKey oldWidget) {
+  void didUpdateWidget(
+      covariant _GlossyBlackKey oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (widget.active && !oldWidget.active) {
       _ctrl.forward(from: 0).then((_) => _ctrl.reverse());
@@ -529,9 +563,13 @@ class _GlossyBlackKeyState extends State<_GlossyBlackKey>
             gradient: const LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [Color(0xFF2B2B2B), Color(0xFF121212)],
+              colors: [
+                Color(0xFF2B2B2B),
+                Color(0xFF121212),
+              ],
             ),
-            border: Border.all(color: Colors.black, width: 1),
+            border: Border.all(
+                color: Colors.black, width: 1),
             boxShadow: const [
               BoxShadow(
                 color: Colors.black87,
@@ -545,7 +583,8 @@ class _GlossyBlackKeyState extends State<_GlossyBlackKey>
             child: Container(
               height: 12,
               decoration: BoxDecoration(
-                borderRadius: const BorderRadius.vertical(
+                borderRadius:
+                const BorderRadius.vertical(
                   bottom: Radius.circular(10),
                 ),
                 gradient: LinearGradient(
@@ -568,7 +607,10 @@ class _GlossyBlackKeyState extends State<_GlossyBlackKey>
 class _BlackSlot {
   final int afterWhiteIndex;
   final String note;
-  const _BlackSlot({required this.afterWhiteIndex, required this.note});
+  const _BlackSlot({
+    required this.afterWhiteIndex,
+    required this.note,
+  });
 }
 
 // -------- Confete de emojis --------
@@ -580,7 +622,8 @@ class _EmojiConfettiOverlay extends StatefulWidget {
       _EmojiConfettiOverlayState();
 }
 
-class _EmojiConfettiOverlayState extends State<_EmojiConfettiOverlay>
+class _EmojiConfettiOverlayState
+    extends State<_EmojiConfettiOverlay>
     with TickerProviderStateMixin {
   late final List<AnimationController> _ctrs;
   late final List<Animation<double>> _anims;
@@ -596,20 +639,31 @@ class _EmojiConfettiOverlayState extends State<_EmojiConfettiOverlay>
           startX: rnd.nextDouble(),
           startY: rnd.nextDouble() * 0.2 + 0.6,
           emoji: (['🎵', '🎶', '✨', '⭐'])[rnd.nextInt(4)],
-          delay: Duration(milliseconds: rnd.nextInt(300)),
-          dur: Duration(milliseconds: 700 + rnd.nextInt(500)),
+          delay: Duration(
+              milliseconds: rnd.nextInt(300)),
+          dur: Duration(
+              milliseconds: 700 + rnd.nextInt(500)),
         ),
       );
     }
     _ctrs = _parts
-        .map((p) => AnimationController(vsync: this, duration: p.dur))
+        .map((p) => AnimationController(
+      vsync: this,
+      duration: p.dur,
+    ))
         .toList();
     _anims = [
       for (final c in _ctrs)
-        CurvedAnimation(parent: c, curve: Curves.easeOut)
+        CurvedAnimation(
+          parent: c,
+          curve: Curves.easeOut,
+        )
     ];
     for (int i = 0; i < _ctrs.length; i++) {
-      Future.delayed(_parts[i].delay, () => _ctrs[i].forward());
+      Future.delayed(
+        _parts[i].delay,
+            () => _ctrs[i].forward(),
+      );
     }
   }
 
@@ -627,27 +681,32 @@ class _EmojiConfettiOverlayState extends State<_EmojiConfettiOverlay>
       builder: (ctx, cons) {
         return Stack(
           children: [
-            for (int i = 0; i < _parts.length; i++)
+            for (int i = 0;
+            i < _parts.length;
+            i++)
               AnimatedBuilder(
                 animation: _anims[i],
                 builder: (_, __) {
                   final t = _anims[i].value;
                   final p = _parts[i];
-                  final x = p.startX * cons.maxWidth +
+                  final x = p.startX *
+                      cons.maxWidth +
                       sin(t * 10 + i) * 10;
-                  final y =
-                      p.startY * cons.maxHeight - t * 180;
+                  final y = p.startY *
+                      cons.maxHeight -
+                      t * 180;
                   return Positioned(
                     left: x,
                     top: y,
                     child: Opacity(
-                      opacity: (1 - t).clamp(0.0, 1.0),
+                      opacity:
+                      (1 - t).clamp(0.0, 1.0),
                       child: Transform.rotate(
                         angle: t * 3.14,
                         child: Text(
                           p.emoji,
-                          style:
-                          const TextStyle(fontSize: 18),
+                          style: const TextStyle(
+                              fontSize: 18),
                         ),
                       ),
                     ),
