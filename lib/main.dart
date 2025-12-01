@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
-import 'home_page.dart';
 import 'services/notification_service.dart';
+import 'home_page.dart';
 
-Future<void> main() async {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Inicializa notificações (vai pedir permissão no iOS na primeira vez)
   await NotificationService.instance.initialize();
 
   runApp(const StoryApp());
@@ -19,10 +18,7 @@ class StoryApp extends StatelessWidget {
     return MaterialApp(
       title: 'Story App',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        useMaterial3: true,
-        fontFamily: 'Roboto',
-      ),
+      theme: ThemeData(useMaterial3: true),
       home: const HomePage(),
     );
   }

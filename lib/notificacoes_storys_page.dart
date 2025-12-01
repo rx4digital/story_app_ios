@@ -35,17 +35,16 @@ class _NotificacoesStorysPageState extends State<NotificacoesStorysPage> {
   Future<void> _loadPrefs() async {
     final prefs = await SharedPreferences.getInstance();
 
-    final savedEnabled = prefs.getBool(_kEnabled);
-    final savedHour = prefs.getInt(_kHour);
-    final savedMinute = prefs.getInt(_kMinute);
-    final savedFreq = prefs.getString(_kFreq);
-
     setState(() {
-      _enabled = savedEnabled ?? false;
-      if (savedHour != null && savedMinute != null) {
-        _time = TimeOfDay(hour: savedHour, minute: savedMinute);
+      _enabled = prefs.getBool(_kEnabled) ?? false;
+
+      final h = prefs.getInt(_kHour);
+      final m = prefs.getInt(_kMinute);
+      if (h != null && m != null) {
+        _time = TimeOfDay(hour: h, minute: m);
       }
-      _freq = savedFreq ?? 'diario';
+
+      _freq = prefs.getString(_kFreq) ?? 'diario';
       _loading = false;
     });
   }
@@ -58,36 +57,18 @@ class _NotificacoesStorysPageState extends State<NotificacoesStorysPage> {
     await prefs.setString(_kFreq, _freq);
   }
 
-  /// Aplica as mudanças: salva no SharedPreferences
-  /// e dispara/cancela notificações.
-  ///
-  /// Por enquanto, quando ligar, manda uma notificação imediatamente
-  /// (só pra testar). Depois você pode evoluir pra agendadas.
   Future<void> _applyNotificationChanges() async {
-    // salva as preferências
     await _savePrefs();
 
     if (_enabled) {
-      // aqui você poderia no futuro chamar um "schedule..."
-      // por enquanto, enviamos uma notificação de teste:
-      await NotificationService.instance.showRandomTipNow();
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lembretes ativados. Notificação de teste enviada ✨'),
-        ),
+      await NotificationService.instance.scheduleRandomStoryNotification(
+        hour: _time.hour,
+        minute: _time.minute,
+        tips: storyNotificationTips,
+        frequency: _freq,
       );
     } else {
-      // cancela todas as notificações locais
-      await NotificationService.instance.cancelAll();
-
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Lembretes desativados.'),
-        ),
-      );
+      await NotificationService.instance.cancelStoryNotifications();
     }
   }
 
@@ -97,6 +78,7 @@ class _NotificacoesStorysPageState extends State<NotificacoesStorysPage> {
       initialTime: _time,
     );
     if (picked == null) return;
+
     setState(() => _time = picked);
     await _applyNotificationChanges();
   }
@@ -109,6 +91,16 @@ class _NotificacoesStorysPageState extends State<NotificacoesStorysPage> {
   void _onChangeFreq(String value) async {
     setState(() => _freq = value);
     await _applyNotificationChanges();
+  }
+
+  Future<void> _testNotification() async {
+    await NotificationService.instance.showRandomTipNow();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text("Notificação de teste enviada ✔️"),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
   }
 
   @override
@@ -141,8 +133,9 @@ class _NotificacoesStorysPageState extends State<NotificacoesStorysPage> {
               decoration: BoxDecoration(
                 color: const Color(0xFF151B23),
                 borderRadius: BorderRadius.circular(18),
-                border:
-                Border.all(color: Colors.white.withOpacity(0.06)),
+                border: Border.all(
+                  color: Colors.white.withOpacity(0.06),
+                ),
               ),
               child: const Text(
                 'Ative os lembretes para receber ideias de storys, '
@@ -225,8 +218,10 @@ class _NotificacoesStorysPageState extends State<NotificacoesStorysPage> {
                                 fontWeight: FontWeight.w700,
                               ),
                             ),
-                            const Icon(Icons.access_time,
-                                color: Colors.white70),
+                            const Icon(
+                              Icons.access_time,
+                              color: Colors.white70,
+                            ),
                           ],
                         ),
                       ),
@@ -290,27 +285,28 @@ class _NotificacoesStorysPageState extends State<NotificacoesStorysPage> {
               ),
             ),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
-            // Botão extra para testar manualmente uma notificação
-            ElevatedButton.icon(
-              onPressed: () async {
-                await NotificationService.instance.showRandomTipNow();
-                if (!mounted) return;
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content:
-                    Text('Notificação de teste enviada com sucesso ✅'),
+            SizedBox(
+              height: 58,
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: _testNotification,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.orange,
+                  foregroundColor: Colors.black,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(14),
                   ),
-                );
-              },
-              icon: const Icon(Icons.notifications_active),
-              label: const Text('Testar notificação agora'),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.orange,
-                foregroundColor: Colors.black,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
+                  elevation: 3,
+                ),
+                icon: const Icon(Icons.notifications_active),
+                label: const Text(
+                  'Testar notificação agora',
+                  style: TextStyle(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 16,
+                  ),
                 ),
               ),
             ),
