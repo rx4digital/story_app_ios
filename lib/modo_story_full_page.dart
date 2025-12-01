@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'dica_musical_page.dart';
 import 'roleta_storys_page.dart';
 import 'quiz_engajamento_page.dart';
+import 'notificacoes_storys_page.dart';
 
 // Dicas (cada arquivo exporta uma lista específica)
 import 'data/tips/story_full/desafio_relampago_tips.dart' as d33;
@@ -228,14 +229,22 @@ class ModoStoryFullPage extends StatelessWidget {
             ),
             const SizedBox(height: 16),
 
+            // 🔔 Lembretes de Fazer Storys -> abre tela de notificações
             InkWell(
               borderRadius: BorderRadius.circular(18),
-              onTap: () => _comingSoon(context),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const NotificacoesStorysPage(),
+                  ),
+                );
+              },
               child: _wideOrange(text: '🔔 Lembretes de Fazer Storys'),
             ),
             const SizedBox(height: 20),
 
-            // AGORA CHAMA O QUIZ
+            // ❓ Quiz do Engajamento
             InkWell(
               borderRadius: BorderRadius.circular(18),
               onTap: () {
@@ -250,6 +259,7 @@ class ModoStoryFullPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
+            // ⚡ Desafio Relâmpago
             InkWell(
               borderRadius: BorderRadius.circular(18),
               onTap: () => _showTipsPopup(
@@ -261,6 +271,7 @@ class ModoStoryFullPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
+            // 🧨 Roteiro Surpresa
             InkWell(
               borderRadius: BorderRadius.circular(18),
               onTap: () => _showTipsPopup(
@@ -272,6 +283,7 @@ class ModoStoryFullPage extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
+            // 🚀 Sem Desculpas! Posta Logo!
             InkWell(
               borderRadius: BorderRadius.circular(18),
               onTap: () => _showTipsPopup(
@@ -283,6 +295,7 @@ class ModoStoryFullPage extends StatelessWidget {
             ),
             const SizedBox(height: 26),
 
+            // Voltar
             InkWell(
               onTap: () => Navigator.pop(context),
               borderRadius: BorderRadius.circular(18),
