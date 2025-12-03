@@ -31,7 +31,7 @@ class NotificationService {
       const InitializationSettings(iOS: iosInit),
     );
 
-    // pede as permissões de fato
+    // pede permissão no iOS
     await _plugin
         .resolvePlatformSpecificImplementation<
         IOSFlutterLocalNotificationsPlugin>()
@@ -42,9 +42,12 @@ class NotificationService {
     );
 
     await TimezoneHelper.ensureInitialized();
-
     _initialized = true;
   }
+
+  // -----------------------------
+  //        NOTIFICAÇÃO BASE
+  // -----------------------------
 
   NotificationDetails get _details => const NotificationDetails(
     iOS: DarwinNotificationDetails(
@@ -62,12 +65,12 @@ class NotificationService {
     return L[rnd.nextInt(L.length)];
   }
 
-  /// Botão "Testar notificação agora"
+  /// Teste imediato
   Future<void> showRandomTipNow() async {
     await initialize();
 
     await _plugin.show(
-      999, // id qualquer
+      999,
       'Lembrete de Story ✨',
       _randomTip(),
       _details,
@@ -75,65 +78,117 @@ class NotificationService {
   }
 
   // -----------------------------
-  //       AGENDAMENTO REAL
+  //     AGENDAMENTO COMPLETO
   // -----------------------------
 
-  /// frequency:
-  /// - 'diario'  -> 1x por dia
-  /// - '2x_dia'  -> 2x por dia (hora + hora+6)
-  /// - 'semanal' -> seg/qua/sex no mesmo horário
   Future<void> scheduleRandomStoryNotification({
     required int hour,
     required int minute,
     required List<String> tips,
-    required String frequency,
+    required String frequency, // diario, 2x_dia, 5x_dia, 10x_dia, semanal
   }) async {
     await initialize();
-    await cancelStoryNotifications();
+    await cancelStoryNotifications(); // sempre limpa antes
 
-    if (frequency == 'diario') {
-      await _scheduleDaily(hour, minute, tips);
-    } else if (frequency == '2x_dia') {
-      await _scheduleDaily(hour, minute, tips);
-      await _scheduleDaily(hour + 6, minute, tips, id: 202);
-    } else if (frequency == 'semanal') {
-      await _scheduleWeekly(hour, minute, tips, DateTime.monday, id: 301);
-      await _scheduleWeekly(hour, minute, tips, DateTime.wednesday, id: 302);
-      await _scheduleWeekly(hour, minute, tips, DateTime.friday, id: 303);
+    switch (frequency) {
+      case 'diario':
+        await _scheduleTimesPerDay(1, hour, minute, tips);
+        break;
+
+      case '2x_dia':
+        await _scheduleTimesPerDay(2, hour, minute, tips);
+        break;
+
+      case '5x_dia':
+        await _scheduleTimesPerDay(5, hour, minute, tips);
+        break;
+
+      case '10x_dia':
+        await _scheduleTimesPerDay(10, hour, minute, tips);
+        break;
+
+      case 'semanal':
+        await _scheduleWeekly(hour, minute, tips);
+        break;
     }
   }
 
-  Future<void> _scheduleDaily(
+  /// Agenda X notificações por dia divididas ao longo de 12 horas
+  Future<void> _scheduleTimesPerDay(
+      int times,
       int hour,
       int minute,
-      List<String> tips, {
-        int id = 200,
-      }) async {
-    final scheduled = TimezoneHelper.nextInstanceOf(hour, minute);
+      List<String> tips,
+      ) async {
+    final now = tz.TZDateTime.now(tz.local);
 
-    await _plugin.zonedSchedule(
-      id,
-      'Lembrete de Story ✨',
-      _randomTip(tips),
-      scheduled,
-      _details,
-      androidAllowWhileIdle: true,
-      uiLocalNotificationDateInterpretation:
-      UILocalNotificationDateInterpretation.wallClockTime,
-      matchDateTimeComponents: DateTimeComponents.time,
+    // Base de horário escolhido
+    tz.TZDateTime base = tz.TZDateTime(
+      tz.local,
+      now.year,
+      now.month,
+      now.day,
+      hour,
+      minute,
     );
+
+    if (base.isBefore(now)) {
+      base = base.add(const Duration(days: 1));
+    }
+
+    const int windowHours = 12;
+
+    final List<tz.TZDateTime> timesList = [];
+
+    if (times == 1) {
+      timesList.add(base);
+    } else {
+      final interval = windowHours / (times - 1);
+
+      for (int i = 0; i < times; i++) {
+        final t = base.add(Duration(hours: (interval * i).round()));
+        timesList.add(t);
+      }
+    }
+
+    int id = 500;
+
+    for (final t in timesList) {
+      await _plugin.zonedSchedule(
+        id++,
+        "Lembrete de Story ✨",
+        _randomTip(tips),
+        t,
+        _details,
+        androidAllowWhileIdle: true,
+        uiLocalNotificationDateInterpretation:
+        UILocalNotificationDateInterpretation.wallClockTime,
+        matchDateTimeComponents: DateTimeComponents.time,
+      );
+    }
   }
 
+  /// Seg/Qua/Sex no horário escolhido
   Future<void> _scheduleWeekly(
       int hour,
       int minute,
       List<String> tips,
-      int weekday, {
-        int id = 300,
-      }) async {
+      ) async {
+    await _scheduleWeeklyDay(hour, minute, tips, DateTime.monday, 301);
+    await _scheduleWeeklyDay(hour, minute, tips, DateTime.wednesday, 302);
+    await _scheduleWeeklyDay(hour, minute, tips, DateTime.friday, 303);
+  }
+
+  Future<void> _scheduleWeeklyDay(
+      int hour,
+      int minute,
+      List<String> tips,
+      int weekday,
+      int id,
+      ) async {
     final now = tz.TZDateTime.now(tz.local);
 
-    var scheduled = tz.TZDateTime(
+    tz.TZDateTime scheduled = tz.TZDateTime(
       tz.local,
       now.year,
       now.month,
@@ -159,6 +214,7 @@ class NotificationService {
     );
   }
 
+  /// Cancela APENAS notificações deste recurso
   Future<void> cancelStoryNotifications() async {
     await _plugin.cancelAll();
   }

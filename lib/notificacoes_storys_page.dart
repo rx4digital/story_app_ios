@@ -253,12 +253,22 @@ class _NotificacoesStorysPageState extends State<NotificacoesStorysPage> {
                           onTap: () => _onChangeFreq('2x_dia'),
                         ),
                         _ChipOption(
+                          label: '5x por dia',
+                          selected: _freq == '5x_dia',
+                          onTap: () => _onChangeFreq('5x_dia'),
+                        ),
+                        _ChipOption(
+                          label: '10x por dia',
+                          selected: _freq == '10x_dia',
+                          onTap: () => _onChangeFreq('10x_dia'),
+                        ),
+                        _ChipOption(
                           label: 'Algumas vezes na semana',
                           selected: _freq == 'semanal',
                           onTap: () => _onChangeFreq('semanal'),
                         ),
                       ],
-                    ),
+                    )
                   ],
                 ),
               ),
