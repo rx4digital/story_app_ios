@@ -10,6 +10,9 @@ import 'data/atraiaclientes/oferta_relampago_tips.dart' as oferta;
 import 'data/atraiaclientes/lotar_agenda_tips.dart' as agenda;
 import 'data/atraiaclientes/brinde_primeiros_tips.dart' as brinde;
 
+// tela do Story do Sonho
+import 'mapa_dos_sonhos_page.dart';
+
 class CaptacaoClientesPage extends StatelessWidget {
   const CaptacaoClientesPage({super.key});
 
@@ -56,14 +59,10 @@ class CaptacaoClientesPage extends StatelessWidget {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    // cabeçalho
                     Row(
                       children: [
-                        const Icon(
-                          Icons.lightbulb,
-                          color: Colors.amber,
-                          size: 22,
-                        ),
+                        const Icon(Icons.lightbulb,
+                            color: Colors.amber, size: 22),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -78,10 +77,8 @@ class CaptacaoClientesPage extends StatelessWidget {
                         IconButton(
                           splashRadius: 20,
                           onPressed: () => Navigator.pop(ctx),
-                          icon: const Icon(
-                            Icons.close_rounded,
-                            color: Colors.white70,
-                          ),
+                          icon: const Icon(Icons.close_rounded,
+                              color: Colors.white70),
                         ),
                       ],
                     ),
@@ -101,7 +98,6 @@ class CaptacaoClientesPage extends StatelessWidget {
 
                     const SizedBox(height: 16),
 
-                    // navegação
                     Row(
                       children: [
                         Expanded(
@@ -193,7 +189,7 @@ class CaptacaoClientesPage extends StatelessWidget {
           ),
           const SizedBox(height: 18),
 
-          // ===== linha dourada: Grave / Story do Sonho (em breve) =====
+          // ===== linha dourada =====
           Row(
             children: [
               Expanded(
@@ -203,9 +199,17 @@ class CaptacaoClientesPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
+
               Expanded(
                 child: _tap(
-                  onTap: () => _comingSoon(context),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const StoryDoSonhoPage(),
+                      ),
+                    );
+                  },
                   child: _goldButton('🌈 Story do Sonho', _goldA, _goldB),
                 ),
               ),
@@ -213,33 +217,27 @@ class CaptacaoClientesPage extends StatelessWidget {
           ),
           const SizedBox(height: 16),
 
-          // 💪 Vença o Medo em 15 segundos – POPUP
+          // ===== POP-UPS =====
           _tap(
             onTap: () => _showTipsPopup(
               context,
               titulo: '💪 Vença o Medo em 15 segundos',
               itens: medo.vencaMedoTips,
             ),
-            child: _goldWideButton(
-              '💪 Vença o Medo em 15 segundos',
-              _goldA,
-              _goldB,
-            ),
+            child:
+            _goldWideButton('💪 Vença o Medo em 15 segundos', _goldA, _goldB),
           ),
           const SizedBox(height: 16),
 
-          // 🔄 Recupere Clientes com Storys – POPUP
           _tap(
             onTap: () => _showTipsPopup(
               context,
               titulo: '🔄 Recupere Clientes com Storys',
               itens: rec.recupereClientesTips,
             ),
-            child:
-            _darkListButton('🔄 Recupere Clientes com Storys', _dark),
+            child: _darkListButton('🔄 Recupere Clientes com Storys', _dark),
           ),
 
-          // 💬 Story para Atrair Atenção do Cliente – POPUP
           _tap(
             onTap: () => _showTipsPopup(
               context,
@@ -247,12 +245,9 @@ class CaptacaoClientesPage extends StatelessWidget {
               itens: atencao.atrairAtencaoTips,
             ),
             child: _darkListButton(
-              '💬 Story para Atrair Atenção do Cliente',
-              _dark,
-            ),
+                '💬 Story para Atrair Atenção do Cliente', _dark),
           ),
 
-          // ⏰ Oferta Rápida – Promoção Relâmpago – POPUP
           _tap(
             onTap: () => _showTipsPopup(
               context,
@@ -260,35 +255,25 @@ class CaptacaoClientesPage extends StatelessWidget {
               itens: oferta.ofertaRelampagoTips,
             ),
             child: _darkListButton(
-              '⏰ Oferta Rápida - Promoção Relâmpago',
-              _dark,
-            ),
+                '⏰ Oferta Rápida - Promoção Relâmpago', _dark),
           ),
 
-          // 📅 Story para Lotar a Agenda – POPUP
           _tap(
             onTap: () => _showTipsPopup(
               context,
               titulo: '📅 Story para Lotar a Agenda',
               itens: agenda.lotarAgendaTips,
             ),
-            child: _darkListButton(
-              '📅 Story para Lotar a Agenda',
-              _dark,
-            ),
+            child: _darkListButton('📅 Story para Lotar a Agenda', _dark),
           ),
 
-          // 🎁 Brinde para os 3 Primeiros – POPUP
           _tap(
             onTap: () => _showTipsPopup(
               context,
               titulo: '🎁 Brinde para os 3 Primeiros',
               itens: brinde.brindePrimeirosTips,
             ),
-            child: _darkListButton(
-              '🎁 Brinde para os 3 Primeiros',
-              _dark,
-            ),
+            child: _darkListButton('🎁 Brinde para os 3 Primeiros', _dark),
           ),
 
           const SizedBox(height: 28),
@@ -298,7 +283,6 @@ class CaptacaoClientesPage extends StatelessWidget {
   }
 
   // ---------- helpers visuais ----------
-
   Widget _tap({
     required VoidCallback onTap,
     required Widget child,
