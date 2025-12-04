@@ -2,7 +2,7 @@ name: story_app
 description: App de teste para rodar no iOS usando Codemagic
 publish_to: "none"
 
-version: 1.2.1883+39
+version: 1.2.1885+41
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -15,6 +15,10 @@ dependencies:
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.3.0
   timezone: ^0.9.2
+  camera: ^0.10.5+9
+  video_player: ^2.9.1
+  permission_handler: ^11.3.0
+  photo_manager: ^3.0.0
 
   # IA (Gemini)
   google_generative_ai: ^0.4.3

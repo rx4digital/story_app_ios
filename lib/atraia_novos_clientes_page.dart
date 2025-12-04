@@ -13,6 +13,9 @@ import 'data/atraiaclientes/brinde_primeiros_tips.dart' as brinde;
 // tela do Story do Sonho
 import 'mapa_dos_sonhos_page.dart';
 
+// tela de gravação com teleprompter
+import 'gravar_comigo_page.dart';
+
 class CaptacaoClientesPage extends StatelessWidget {
   const CaptacaoClientesPage({super.key});
 
@@ -194,7 +197,16 @@ class CaptacaoClientesPage extends StatelessWidget {
             children: [
               Expanded(
                 child: _tap(
-                  onTap: () => _comingSoon(context),
+                  onTap: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (_) => const GravarComigoPage(
+                          roteiro: null, // pode passar algo depois se quiser
+                        ),
+                      ),
+                    );
+                  },
                   child: _goldButton('🎥 Grave Junto Comigo', _goldA, _goldB),
                 ),
               ),
@@ -224,8 +236,8 @@ class CaptacaoClientesPage extends StatelessWidget {
               titulo: '💪 Vença o Medo em 15 segundos',
               itens: medo.vencaMedoTips,
             ),
-            child:
-            _goldWideButton('💪 Vença o Medo em 15 segundos', _goldA, _goldB),
+            child: _goldWideButton(
+                '💪 Vença o Medo em 15 segundos', _goldA, _goldB),
           ),
           const SizedBox(height: 16),
 

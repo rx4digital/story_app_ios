@@ -64,19 +64,37 @@
     <true/>
 
     <!-- ========================================================= -->
-    <!-- 📌 NECESSÁRIO PARA NOTIFICAÇÕES LOCAIS NO iOS            -->
+    <!-- 📌 NOTIFICAÇÕES LOCAIS                                   -->
     <!-- ========================================================= -->
 
-    <!-- Texto que aparece no pop-up pedindo permissão -->
     <key>NSUserNotificationUsageDescription</key>
     <string>O Story Feito envia lembretes com ideias e dicas rápidas para seus storys diários.</string>
 
-    <!-- Permite agendamento repetido / processamento em background -->
     <key>UIBackgroundModes</key>
     <array>
         <string>fetch</string>
         <string>remote-notification</string>
     </array>
+
+    <!-- ========================================================= -->
+    <!-- 📌 PERMISSÕES DE CÂMERA / ÁUDIO / GALERIA                 -->
+    <!-- ========================================================= -->
+
+    <!-- Câmera -->
+    <key>NSCameraUsageDescription</key>
+    <string>O Story Feito precisa acessar a câmera para gravar seus storys.</string>
+
+    <!-- Microfone -->
+    <key>NSMicrophoneUsageDescription</key>
+    <string>O Story Feito precisa acessar o microfone para gravar o áudio dos seus vídeos.</string>
+
+    <!-- Salvar vídeos na galeria -->
+    <key>NSPhotoLibraryAddUsageDescription</key>
+    <string>O Story Feito salva seus vídeos na galeria para você postar depois.</string>
+
+    <!-- Ler arquivos da galeria (vídeos, fotos) -->
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>O Story Feito acessa sua galeria para salvar e exibir vídeos gravados.</string>
 
 </dict>
 </plist>
