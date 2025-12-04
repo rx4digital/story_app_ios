@@ -1,9 +1,17 @@
+// lib/main.dart
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+
 import 'services/notification_service.dart';
-import 'home_page.dart';
+import 'services/auth_gate.dart';
+import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
 
   await NotificationService.instance.initialize();
 
@@ -18,8 +26,12 @@ class StoryApp extends StatelessWidget {
     return MaterialApp(
       title: 'Story App',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(useMaterial3: true),
-      home: const HomePage(),
+      theme: ThemeData(
+        useMaterial3: true,
+        brightness: Brightness.dark,
+        fontFamily: 'Roboto',
+      ),
+      home: const AuthGate(),
     );
   }
 }

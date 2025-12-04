@@ -2,7 +2,7 @@ name: story_app
 description: App de teste para rodar no iOS usando Codemagic
 publish_to: "none"
 
-version: 1.2.1886+42
+version: 1.2.1887+43
 
 environment:
   sdk: ">=3.4.0 <4.0.0"
@@ -19,6 +19,8 @@ dependencies:
   video_player: ^2.9.1
   permission_handler: ^11.3.0
   photo_manager: ^3.0.0
+  firebase_core: ^2.31.0
+  firebase_auth: ^4.19.0
 
   # IA (Gemini)
   google_generative_ai: ^0.4.3
