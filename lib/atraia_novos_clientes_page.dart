@@ -13,26 +13,26 @@ import 'data/atraiaclientes/brinde_primeiros_tips.dart' as brinde;
 // tela do Story do Sonho
 import 'mapa_dos_sonhos_page.dart';
 
-// tela de gravação com teleprompter
-import 'gravar_comigo_page.dart';
+// 👉 tela de roteiro IA (caminho correto)
+import 'roteiro_ia_page.dart';
 
 class CaptacaoClientesPage extends StatelessWidget {
   const CaptacaoClientesPage({super.key});
 
-  // ---------- cores ----------
+  // cores
   static const _bg = Color(0xFF0E0F11);
   static const _dark = Color(0xFF0F1B22);
   static const _goldA = Color(0xFFF4A21A);
   static const _goldB = Color(0xFFDB8B08);
 
-  // ---------- snackbar genérico ----------
+  // snackbar
   void _comingSoon(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Em breve ✨')),
     );
   }
 
-  // ---------- POPUP REUTILIZÁVEL ----------
+  // POP-UP de dicas reutilizável
   Future<void> _showTipsPopup(
       BuildContext context, {
         required String titulo,
@@ -86,7 +86,6 @@ class CaptacaoClientesPage extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 6),
-
                     Align(
                       alignment: Alignment.centerLeft,
                       child: Text(
@@ -98,9 +97,7 @@ class CaptacaoClientesPage extends StatelessWidget {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 16),
-
                     Row(
                       children: [
                         Expanded(
@@ -110,15 +107,13 @@ class CaptacaoClientesPage extends StatelessWidget {
                                 color: Colors.white.withOpacity(.2),
                               ),
                               foregroundColor: Colors.white,
-                              padding:
-                              const EdgeInsets.symmetric(vertical: 12),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            onPressed: index == 0
-                                ? null
-                                : () => setState(() => index--),
+                            onPressed:
+                            index == 0 ? null : () => setState(() => index--),
                             child: const Text('Voltar'),
                           ),
                         ),
@@ -128,8 +123,7 @@ class CaptacaoClientesPage extends StatelessWidget {
                             style: FilledButton.styleFrom(
                               backgroundColor: const Color(0xFFFF9900),
                               foregroundColor: Colors.black,
-                              padding:
-                              const EdgeInsets.symmetric(vertical: 12),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
@@ -161,7 +155,7 @@ class CaptacaoClientesPage extends StatelessWidget {
     );
   }
 
-  // ---------- build ----------
+  // ---------- UI ----------
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -192,7 +186,9 @@ class CaptacaoClientesPage extends StatelessWidget {
           ),
           const SizedBox(height: 18),
 
-          // ===== linha dourada =====
+          /// ==========================
+          /// 🔥 BOTÕES PRINCIPAIS
+          /// ==========================
           Row(
             children: [
               Expanded(
@@ -201,9 +197,8 @@ class CaptacaoClientesPage extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => const GravarComigoPage(
-                          roteiro: null, // pode passar algo depois se quiser
-                        ),
+                        // 👉 abre a tela de roteiro IA
+                        builder: (_) => const RoteiroIaPage(),
                       ),
                     );
                   },
@@ -211,7 +206,6 @@ class CaptacaoClientesPage extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 16),
-
               Expanded(
                 child: _tap(
                   onTap: () {
@@ -227,18 +221,22 @@ class CaptacaoClientesPage extends StatelessWidget {
               ),
             ],
           ),
+
           const SizedBox(height: 16),
 
-          // ===== POP-UPS =====
+          /// ==========================
+          /// POP-UPS
+          /// ==========================
           _tap(
             onTap: () => _showTipsPopup(
               context,
               titulo: '💪 Vença o Medo em 15 segundos',
               itens: medo.vencaMedoTips,
             ),
-            child: _goldWideButton(
-                '💪 Vença o Medo em 15 segundos', _goldA, _goldB),
+            child:
+            _goldWideButton('💪 Vença o Medo em 15 segundos', _goldA, _goldB),
           ),
+
           const SizedBox(height: 16),
 
           _tap(
@@ -294,7 +292,7 @@ class CaptacaoClientesPage extends StatelessWidget {
     );
   }
 
-  // ---------- helpers visuais ----------
+  // Helpers UI
   Widget _tap({
     required VoidCallback onTap,
     required Widget child,
