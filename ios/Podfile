@@ -1,51 +1,24 @@
 # ios/Podfile
 
 platform :ios, '13.0'
-ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
-project 'Runner', {
-  'Debug' => :debug,
-  'Profile' => :release,
-  'Release' => :release,
-}
-
-def flutter_root
-  generated_xcode_build_settings_path = File.expand_path(
-    File.join('..', 'Flutter', 'Generated.xcconfig'),
-    __FILE__,
-  )
-  unless File.exist?(generated_xcode_build_settings_path)
-    raise "#{generated_xcode_build_settings_path} não existe. Rode `flutter build ios` ou `flutter run` pelo menos uma vez."
-  end
-
-  File.foreach(generated_xcode_build_settings_path) do |line|
-    matches = line.match(/FLUTTER_ROOT\=(.*)/)
-    return matches[1].strip if matches
-  end
-  raise 'FLUTTER_ROOT não encontrado em Generated.xcconfig'
-end
-
-require File.expand_path(
-  File.join('packages', 'flutter_tools', 'bin', 'podhelper'),
-  flutter_root,
-)
-
-# precisamos de frameworks por causa do Firebase
+# FlutterFire + FirebaseAuth funcionam melhor com frameworks estáticos
 use_frameworks! :linkage => :static
+use_modular_headers!
 
-flutter_ios_podfile_setup
+# Caminho padrão do Flutter
+flutter_root = File.expand_path('../..', __FILE__)
+load File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper.rb')
 
 target 'Runner' do
-  use_frameworks! :linkage => :static
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
-  # configurações padrão do Flutter
-  flutter_additional_ios_build_settings(installer)
-
-  # 🔧 gambis para o erro de header não modular do Firebase
   installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+
+    # ✅ Ajuste para evitar o erro de "non-modular header" do firebase_auth
     target.build_configurations.each do |config|
       config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
