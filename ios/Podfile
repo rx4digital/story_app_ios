@@ -1,0 +1,41 @@
+# ios/Podfile
+
+platform :ios, '13.0'
+
+# Desliga estatísticas anônimas do CocoaPods
+ENV['COCOAPODS_DISABLE_STATS'] = 'true'
+
+project 'Runner', {
+  'Debug' => :debug,
+  'Profile' => :release,
+  'Release' => :release,
+}
+
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "Generated.xcconfig must exist. Run `flutter pub get`."
+  end
+
+  File.foreach(generated_xcode_build_settings_path) do |line|
+    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    return matches[1].strip if matches
+  end
+
+  raise "FLUTTER_ROOT not found in Generated.xcconfig. Run `flutter pub get`."
+end
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
+flutter_ios_podfile_setup
+
+target 'Runner' do
+  # ❌ IMPORTANTE: não colocar `use_frameworks!` aqui
+  # nem `use_modular_headers!` a menos que algum plugin peça
+  flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
+end
+
+post_install do |installer|
+  # Hook padrão do Flutter (ajusta architectures, bitcode etc.)
+  flutter_additional_ios_build_settings(installer)
+end
