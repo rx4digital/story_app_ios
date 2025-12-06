@@ -30,12 +30,13 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  # ❌ IMPORTANTE: não colocar `use_frameworks!` aqui
-  # nem `use_modular_headers!` a menos que algum plugin peça
+  # ⚠️ NÃO colocar `use_frameworks!` nem `use_modular_headers!` aqui
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
-  # Hook padrão do Flutter (ajusta architectures, bitcode etc.)
-  flutter_additional_ios_build_settings(installer)
+  # ESTA é a forma correta (igual ao template do Flutter)
+  installer.pods_project.targets.each do |target|
+    flutter_additional_ios_build_settings(target)
+  end
 end
