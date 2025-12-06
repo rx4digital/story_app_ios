@@ -5,9 +5,9 @@ workflows:
     instance_type: mac_mini_m2
 
     environment:
-      flutter: stable         # canal stable do Flutter
-      xcode: "14.3.1"         # Xcode suportado
-      cocoapods: "1.15.2"     # <- força versão estável de CocoaPods
+      flutter: stable
+      xcode: 15.0.1     # <-- CORRIGIDO: versão suportada pelo Codemagic
+      cocoapods: 1.15.2
       vars:
         BUNDLE_ID: com.rx4digital.storyapp
       groups:
@@ -32,20 +32,15 @@ workflows:
         script: |
           xcode-project use-profiles
 
-      # passo separado pra ver claramente qualquer erro no pod install
-      - name: Install CocoaPods dependencies
-        script: |
-          set -e
-          cd ios
-          pod repo update
-          pod install --verbose
-          cd ..
-
       - name: Flutter build IPA
         script: |
-          set -e
+          flutter clean
           flutter pub get
-          flutter build ipa --release
+          cd ios
+          pod repo update
+          pod install
+          cd ..
+          flutter build ipa --release --no-codesign
 
     artifacts:
       - build/ios/ipa/*.ipa
@@ -56,4 +51,3 @@ workflows:
         key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
         submit_to_testflight: true
-        expire_build_submitted_for_review: true
