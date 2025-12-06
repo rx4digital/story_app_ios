@@ -6,6 +6,7 @@ workflows:
 
     environment:
       flutter: stable
+      xcode: "14.3.1"
       vars:
         BUNDLE_ID: com.rx4digital.storyapp
       groups:
