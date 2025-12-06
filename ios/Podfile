@@ -1,8 +1,6 @@
 # ios/Podfile
-
 platform :ios, '13.0'
 
-# Desliga estatísticas anônimas do CocoaPods
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
 
 project 'Runner', {
@@ -14,29 +12,34 @@ project 'Runner', {
 def flutter_root
   generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
   unless File.exist?(generated_xcode_build_settings_path)
-    raise "Generated.xcconfig must exist. Run `flutter pub get`."
+    raise "Generated.xcconfig not found. Run 'flutter pub get' first."
   end
-
   File.foreach(generated_xcode_build_settings_path) do |line|
     matches = line.match(/FLUTTER_ROOT\=(.*)/)
     return matches[1].strip if matches
   end
-
-  raise "FLUTTER_ROOT not found in Generated.xcconfig. Run `flutter pub get`."
+  raise "FLUTTER_ROOT not found in Generated.xcconfig. Run 'flutter pub get' first."
 end
 
-require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+require File.expand_path(File.join(flutter_root, 'packages', 'flutter_tools', 'bin', 'podhelper'), __FILE__)
 
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  # ⚠️ NÃO colocar `use_frameworks!` nem `use_modular_headers!` aqui
+  use_frameworks! :linkage => :static
+  use_modular_headers!
+
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
-  # ESTA é a forma correta (igual ao template do Flutter)
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
+
+    # ⚠️ Isso aqui é o que resolve o "Include of non-modular header" do Firebase
+    target.build_configurations.each do |config|
+      config.build_settings['BUILD_LIBRARY_FOR_DISTRIBUTION'] = 'YES'
+      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+    end
   end
 end
