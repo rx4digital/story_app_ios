@@ -6,12 +6,11 @@ workflows:
 
     environment:
       flutter: stable
-      # ❗ Fix: não usar "latest", fixar uma versão suportada pelo App Store Connect
-      xcode: 15.1
+      xcode: "14.3.1"   # ✅ FIX: usar versão suportada
       vars:
         BUNDLE_ID: com.rx4digital.storyapp
       groups:
-        - ios_signing   # grupo de variáveis/arquivos de assinatura que você já configurou no Codemagic
+        - ios_signing
 
     scripts:
       - name: Set up keychain
@@ -35,7 +34,7 @@ workflows:
       - name: Flutter build IPA
         script: |
           flutter pub get
-          flutter build ipa --release --export-options-plist=/Users/builder/export_options.plist
+          flutter build ipa --release
 
     artifacts:
       - build/ios/ipa/*.ipa
