@@ -5,13 +5,12 @@ workflows:
     instance_type: mac_mini_m2
 
     environment:
-      flutter: stable
-      xcode: 15.0.1     # <-- CORRIGIDO: versão suportada pelo Codemagic
-      cocoapods: 1.15.2
+      flutter: stable          # ou uma versão fixa, tipo "3.24.3"
+      xcode: 16.0              # <<< FORÇANDO XCODE 16.0
       vars:
         BUNDLE_ID: com.rx4digital.storyapp
       groups:
-        - ios_signing
+        - ios_signing          # já configurado no Codemagic
 
     scripts:
       - name: Set up keychain
@@ -34,13 +33,9 @@ workflows:
 
       - name: Flutter build IPA
         script: |
-          flutter clean
           flutter pub get
-          cd ios
-          pod repo update
-          pod install
-          cd ..
-          flutter build ipa --release --no-codesign
+          flutter build ipa --release \
+            --export-options-plist=/Users/builder/export_options.plist
 
     artifacts:
       - build/ios/ipa/*.ipa
@@ -50,4 +45,6 @@ workflows:
         api_key: $APP_STORE_CONNECT_PRIVATE_KEY
         key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+
         submit_to_testflight: true
+        expire_build_submitted_for_review: true
