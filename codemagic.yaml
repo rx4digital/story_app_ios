@@ -6,15 +6,12 @@ workflows:
 
     environment:
       flutter: stable
-      # Pode deixar latest, mas eu prefiro fixar uma versão estável de Xcode também
-      xcode: 15.2
-      # 👇 ESSENCIAL: não deixar o Codemagic escolher uma versão maluca de CocoaPods
-      cocoapods: 1.15.2
-
+      # ❗ Fix: não usar "latest", fixar uma versão suportada pelo App Store Connect
+      xcode: 15.1
       vars:
         BUNDLE_ID: com.rx4digital.storyapp
       groups:
-        - ios_signing
+        - ios_signing   # grupo de variáveis/arquivos de assinatura que você já configurou no Codemagic
 
     scripts:
       - name: Set up keychain
@@ -34,13 +31,6 @@ workflows:
       - name: Use provisioning profiles in Xcode project
         script: |
           xcode-project use-profiles
-
-      # (Opcional, mas ajuda muito quando tem erro estranho de pods)
-      - name: Pod repo update (optional)
-        script: |
-          cd ios
-          pod repo update
-          cd ..
 
       - name: Flutter build IPA
         script: |
