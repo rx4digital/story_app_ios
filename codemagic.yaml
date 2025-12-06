@@ -5,7 +5,9 @@ workflows:
     instance_type: mac_mini_m2
 
     environment:
-      flutter: stable
+      flutter: stable         # canal stable do Flutter
+      xcode: "14.3.1"         # Xcode suportado
+      cocoapods: "1.15.2"     # <- força versão estável de CocoaPods
       vars:
         BUNDLE_ID: com.rx4digital.storyapp
       groups:
@@ -30,8 +32,18 @@ workflows:
         script: |
           xcode-project use-profiles
 
+      # passo separado pra ver claramente qualquer erro no pod install
+      - name: Install CocoaPods dependencies
+        script: |
+          set -e
+          cd ios
+          pod repo update
+          pod install --verbose
+          cd ..
+
       - name: Flutter build IPA
         script: |
+          set -e
           flutter pub get
           flutter build ipa --release
 
@@ -43,6 +55,5 @@ workflows:
         api_key: $APP_STORE_CONNECT_PRIVATE_KEY
         key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
-
         submit_to_testflight: true
         expire_build_submitted_for_review: true

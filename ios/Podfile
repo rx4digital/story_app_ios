@@ -28,13 +28,12 @@ require File.expand_path(File.join(flutter_root, 'packages', 'flutter_tools', 'b
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  # ⚠️ IMPORTANTE: SEM use_frameworks! e SEM use_modular_headers!
+  # NADA de use_frameworks! aqui
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
-    # Configurações padrão do Flutter
     flutter_additional_ios_build_settings(target)
   end
 end
